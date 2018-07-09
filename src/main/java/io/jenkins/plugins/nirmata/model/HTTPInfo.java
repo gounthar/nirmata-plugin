@@ -1,14 +1,12 @@
-
 package io.jenkins.plugins.nirmata.model;
-
-import static java.util.Optional.ofNullable;
-
-import java.util.List;
-
-import org.apache.http.Header;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.http.Header;
+
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 public class HTTPInfo {
 
@@ -81,7 +79,7 @@ public class HTTPInfo {
     @Override
     public String toString() {
         return String.format(
-            "Uri: %s,\nMethod: %s,%nStatusCode: %s,%nMessage: %s,%nEntity: %s,%nResult: %s", _uri, _method, _statusCode,
-            _message, ofNullable(_entity).orElse("<not applicable>"), _payload);
+                "Uri: %s,%nMethod: %s,%nStatusCode: %s,%nMessage: %s,%nEntity: %s,%nResult: %s", _uri, _method, _statusCode,
+                _message, ofNullable(_entity).orElse("<not applicable>"), _payload);
     }
 }
