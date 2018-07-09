@@ -81,7 +81,7 @@ public class HTTPInfo {
     @Override
     public String toString() {
         return String.format(
-            "Uri: %s,\nMethod: %s,\nStatusCode: %s,\nMessage: %s,\nEntity: %s,\nResult: %s", _uri, _method, _statusCode,
+            "Uri: %s,\nMethod: %s,%nStatusCode: %s,%nMessage: %s,%nEntity: %s,%nResult: %s", _uri, _method, _statusCode,
             _message, ofNullable(_entity).orElse("<not applicable>"), _payload);
     }
 }

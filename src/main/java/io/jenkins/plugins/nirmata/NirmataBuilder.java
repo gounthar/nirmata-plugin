@@ -226,7 +226,7 @@ public class NirmataBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillApikeyItems() {
-            if (!Jenkins.getInstanceOrNull().hasPermission(Jenkins.ADMINISTER)) {
+            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
                 return new ListBoxModel();
             }
 

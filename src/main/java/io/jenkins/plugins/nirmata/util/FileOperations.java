@@ -1,19 +1,14 @@
-
 package io.jenkins.plugins.nirmata.util;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileOperations {
 
@@ -49,27 +44,6 @@ public class FileOperations {
         }
 
         return stringBuffer.toString();
-    }
-
-    public static boolean deleteFile(String filePath) {
-        File file = new File(filePath);
-        return file.delete();
-    }
-
-    public static String writeToTempFile(String fileContent) {
-        File tempFile = null;
-
-        try {
-            tempFile = File.createTempFile("tempfile", ".yaml");
-
-            BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
-            bw.write(fileContent);
-            bw.close();
-        } catch (Exception e) {
-            logger.error("Failed to write to a temp file, {}", e);
-        }
-
-        return tempFile == null ? null : tempFile.getAbsolutePath();
     }
 
     public static String readFile(String fileName) throws Exception {
