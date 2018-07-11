@@ -1,4 +1,5 @@
 <?jelly escape-by-default='true'?>
 <div>
-    Nirmata Plugin
+    Enables synchronization of YAML/JSON files stored in a Git repository with a Kubernetes application managed on the
+    Nirmata platform
 </div>
