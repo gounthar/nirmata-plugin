@@ -78,7 +78,7 @@ public abstract class HttpClient {
             result.close();
 
             httpInfo.setMethod(request.getMethod());
-            httpInfo.setEntity(entity.toString());
+            httpInfo.setEntity(entity.toString() + "\n" + EntityUtils.toString(entity));
             httpInfo.setUri(request.getURI().toString());
             httpInfo.setHeaders(Arrays.asList(request.getAllHeaders()));
             httpInfo.setPayload(jsonResponse);

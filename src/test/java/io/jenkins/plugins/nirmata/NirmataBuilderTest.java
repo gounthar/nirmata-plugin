@@ -1,6 +1,4 @@
 
 package io.jenkins.plugins.nirmata;
 
-public class NirmataBuilderTest {
-
-}
+public class NirmataBuilderTest {}

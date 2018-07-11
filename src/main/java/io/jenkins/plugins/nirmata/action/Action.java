@@ -6,47 +6,82 @@ import java.util.List;
 import com.google.common.base.Strings;
 
 import hudson.AbortException;
+import hudson.FilePath;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.nirmata.ActionBuilder;
+import io.jenkins.plugins.nirmata.DeleteEnvAppBuilder;
+import io.jenkins.plugins.nirmata.DeployEnvAppBuilder;
+import io.jenkins.plugins.nirmata.UpdateCatAppBuilder;
+import io.jenkins.plugins.nirmata.UpdateEnvAppBuilder;
 import io.jenkins.plugins.nirmata.model.HTTPInfo;
 import io.jenkins.plugins.nirmata.model.Model;
+import io.jenkins.plugins.nirmata.model.Response;
+import io.jenkins.plugins.nirmata.model.Result;
 import io.jenkins.plugins.nirmata.util.FileOperations;
 import io.jenkins.plugins.nirmata.util.LocalRepo;
 import io.jenkins.plugins.nirmata.util.NirmataClient;
 
 public final class Action {
 
-    private final NirmataClient _client;
-    private final TaskListener _listener;
+    private static final int NUM_OF_RETRIES = 15;
 
-    public Action(NirmataClient client, TaskListener listener) {
-        this._client = client;
-        this._listener = listener;
+    private final NirmataClient _client;
+    private final FilePath _workspace;
+    private final TaskListener _listener;
+    private String _status = null;
+
+    public Action(NirmataClient client, FilePath workspace, TaskListener listener) {
+        _client = client;
+        _workspace = workspace;
+        _listener = listener;
     }
 
     public NirmataClient getClient() {
         return _client;
     }
 
+    public FilePath getWorkspace() {
+        return _workspace;
+    }
+
     public TaskListener getListener() {
         return _listener;
     }
 
-    public void buildStep(ActionType type, String... vargs) throws AbortException {
-        if (type.equals(ActionType.UPDATE_CAT_APP) && vargs.length == 4) {
+    public void buildStep(ActionBuilder builder) throws AbortException {
+        if (builder instanceof UpdateEnvAppBuilder) {
+            UpdateEnvAppBuilder updateBuilder = (UpdateEnvAppBuilder) builder;
 
-            update(vargs[0], vargs[1], vargs[2], vargs[3]);
-        } else if (type.equals(ActionType.UPDATE_ENV_APP) && vargs.length == 5) {
+            String appendedDirectoryPath = FileOperations.appendBasePath(_workspace.getRemote(),
+                updateBuilder.getDirectories());
 
-            update(vargs[0], vargs[1], vargs[2], vargs[3], vargs[4]);
-        } else if (type.equals(ActionType.DEPLOY_ENV_APP) && vargs.length == 3) {
+            update(updateBuilder.getEnvironment(), updateBuilder.getApplication(), appendedDirectoryPath,
+                !updateBuilder.isIncludescheck() ? null : updateBuilder.getIncludes(),
+                !updateBuilder.isExcludescheck() ? null : updateBuilder.getExcludes(), updateBuilder.getTimeout());
 
-            deploy(vargs[0], vargs[1], vargs[2]);
-        } else if (type.equals(ActionType.DELETE_ENV_APP) && vargs.length == 2) {
+        } else if (builder instanceof UpdateCatAppBuilder) {
+            UpdateCatAppBuilder updateBuilder = (UpdateCatAppBuilder) builder;
 
-            delete(vargs[0], vargs[1]);
+            String appendedDirectoryPath = FileOperations.appendBasePath(_workspace.getRemote(),
+                updateBuilder.getDirectories());
+
+            update(updateBuilder.getCatalog(), appendedDirectoryPath,
+                !updateBuilder.isIncludescheck() ? null : updateBuilder.getIncludes(),
+                !updateBuilder.isExcludescheck() ? null : updateBuilder.getExcludes(), updateBuilder.getTimeout());
+
+        } else if (builder instanceof DeployEnvAppBuilder) {
+            DeployEnvAppBuilder deployBuilder = (DeployEnvAppBuilder) builder;
+
+            deploy(deployBuilder.getEnvironment(), deployBuilder.getCatalog(), deployBuilder.getApplication(),
+                deployBuilder.getTimeout());
+
+        } else if (builder instanceof DeleteEnvAppBuilder) {
+            DeleteEnvAppBuilder deleteBuilder = (DeleteEnvAppBuilder) builder;
+
+            delete(deleteBuilder.getEnvironment(), deleteBuilder.getApplication(), deleteBuilder.getTimeout());
+
         } else {
-
-            throw new AbortException("Unknown action, " + type.toString());
+            throw new AbortException("Unknown action request!");
         }
     }
 
@@ -58,10 +93,12 @@ public final class Action {
         _listener.getLogger().println();
     }
 
-    private void update(String catalog, String directories, String includes, String excludes) throws AbortException {
+    private void update(String catalog, String directories, String includes, String excludes, String timeout)
+        throws AbortException {
         printActionInfo("Action: " + ActionType.UPDATE_CAT_APP.toString(),
             "Catalog: " + catalog,
             "Directories: " + directories,
+            "Timeout: " + timeout,
             "Includes: " + includes,
             "Excludes: " + excludes);
 
@@ -83,7 +120,7 @@ public final class Action {
             List<String> listOfFiles = LocalRepo.getFilesInDirectory(listOfDirectories, includes, excludes);
             String yamlStr = FileOperations.appendFiles(listOfFiles);
 
-            HTTPInfo result = _client.updateAppsInCatalog(applicationId, yamlStr);
+            HTTPInfo result = _client.updateAppInCatalog(applicationId, yamlStr);
             printActionInfo(result.toString());
         } else {
             throw new AbortException(
@@ -92,12 +129,13 @@ public final class Action {
         }
     }
 
-    private void update(String environment, String application, String directories, String includes,
-        String excludes) throws AbortException {
+    private void update(String environment, String application, String directories, String includes, String excludes,
+        String timeout) throws AbortException {
         printActionInfo("Action: " + ActionType.UPDATE_ENV_APP.toString(),
             "Environment: " + environment,
             "Application: " + application,
             "Directories: " + directories,
+            "Timeout: " + timeout,
             "Includes: " + includes,
             "Excludes: " + excludes);
 
@@ -137,19 +175,23 @@ public final class Action {
             List<String> listOfFiles = LocalRepo.getFilesInDirectory(listOfDirectories, includes, excludes);
             String yamlStr = FileOperations.appendFiles(listOfFiles);
 
-            HTTPInfo result = _client.updateAppsInEnvironment(applicationId, yamlStr);
+            HTTPInfo result = _client.updateAppInEnvironment(applicationId, yamlStr);
             printActionInfo(result.toString());
+
+            String status = getStatus(timeout, applicationId);
+            printActionInfo("Action Status: " + status);
         } else {
             throw new AbortException(
                 String.format("Unable to update application, {%s}. ApplicationId is null", application));
         }
     }
 
-    private void deploy(String environment, String catalog, String application) throws AbortException {
+    private void deploy(String environment, String catalog, String application, String timeout) throws AbortException {
         printActionInfo("Action: " + ActionType.DEPLOY_ENV_APP.toString(),
             "Environment: " + environment,
             "Catalog: " + catalog,
-            "Application: " + application);
+            "Application: " + application,
+            "Timeout: " + timeout);
 
         String applicationId = null;
         List<Model> catalogApplications = _client.getAppsFromCatalog().getModel();
@@ -165,8 +207,14 @@ public final class Action {
         }
 
         if (!Strings.isNullOrEmpty(applicationId)) {
-            HTTPInfo result = _client.deployAppsInEnvironment(applicationId, environment, application);
+            HTTPInfo result = _client.deployAppInEnvironment(applicationId, environment, application);
             printActionInfo(result.toString());
+
+            Response response = _client.getResponse(result);
+            if (response != null) {
+                String status = getStatus(timeout, response.getResult().getId());
+                printActionInfo("Action Status: " + status);
+            }
         } else {
             throw new AbortException(
                 String.format("Unable to depoly application in environment, {%s}. ApplicationId is null",
@@ -174,10 +222,11 @@ public final class Action {
         }
     }
 
-    private void delete(String environment, String application) throws AbortException {
+    private void delete(String environment, String application, String timeout) throws AbortException {
         printActionInfo("Action: " + ActionType.DELETE_ENV_APP.toString(),
             "Environment: " + environment,
-            "Application: " + application);
+            "Application: " + application,
+            "Timeout: " + timeout);
 
         String environmentId = null;
         List<Model> environments = _client.getEnvironments().getModel();
@@ -211,11 +260,47 @@ public final class Action {
         }
 
         if (!Strings.isNullOrEmpty(applicationId)) {
-            HTTPInfo result = _client.deleteAppsFromEnvironment(applicationId);
+            HTTPInfo result = _client.deleteAppInEnvironment(applicationId);
             printActionInfo(result.toString());
+
+            String status = getStatus(timeout, applicationId);
+            printActionInfo("Action Status: " + status);
         } else {
             throw new AbortException(
                 String.format("Unable to delete application, {%s}. ApplicationId is null", application));
         }
+    }
+
+    public String getStatus(String timeout, String applicationID) {
+        long timeInterval = Integer.parseInt(timeout) * 1000;
+        int retries = 0;
+        boolean flag = true;
+
+        while (flag && retries++ < NUM_OF_RETRIES) {
+            try {
+                Result appStatus = _client.getAppStateInEnvironment(applicationID).getResult();
+
+                _listener.getLogger().print(".");
+                if (appStatus != null) {
+                    if (appStatus.getId().equals(applicationID)) {
+                        _status = appStatus.getState();
+                        if (!_status.equals("executing")) {
+                            flag = false;
+                        }
+                    }
+                } else {
+                    _listener.getLogger().println(
+                        String.format("%nERROR: Unable to retrieve state of application, {%s}", applicationID));
+                    flag = false;
+                    _status = null;
+                }
+
+                Thread.sleep(timeInterval);
+            } catch (InterruptedException e) {
+                _listener.getLogger().println("ERROR: " + e.getMessage());
+            }
+        }
+
+        return _status;
     }
 }

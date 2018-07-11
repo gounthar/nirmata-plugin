@@ -1,14 +1,16 @@
-package io.jenkins.plugins.nirmata.util;
 
-import com.google.common.base.Strings;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package io.jenkins.plugins.nirmata.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
 
 public class FileOperations {
 

@@ -1,0 +1,26 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:entry title="Nirmata Endpoint" field="endpoint" help="/plugin/nirmata/help-endpoint.html">
+        <f:textbox default="nirmata.io"/>
+    </f:entry>
+
+    <f:entry title="Nirmata API Credentials" field="apikey" help="/plugin/nirmata/help-apikey.html">
+        <c:select/>
+    </f:entry>
+
+    <f:entry title="Existing Environment" field="environment" help="/plugin/nirmata/help-environment.html">
+        <f:select/>
+    </f:entry>
+
+    <f:entry title="Catalog Application" field="catalog" help="/plugin/nirmata/help-catalog.html">
+        <f:select/>
+    </f:entry>
+
+    <f:entry title="Name for Application" field="application" help="/plugin/nirmata/help-nameforapplication.html">
+        <f:textbox/>
+    </f:entry>
+
+    <f:entry title="Timeout" field="timeout" help="/plugin/nirmata/help-timeout.html">
+        <f:textbox default="0"/>
+    </f:entry>
+</j:jelly>

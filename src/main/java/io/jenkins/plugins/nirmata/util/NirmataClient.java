@@ -16,6 +16,7 @@ import hudson.AbortException;
 import io.jenkins.plugins.nirmata.model.HTTPInfo;
 import io.jenkins.plugins.nirmata.model.Model;
 import io.jenkins.plugins.nirmata.model.Response;
+import io.jenkins.plugins.nirmata.model.Result;
 import io.jenkins.plugins.nirmata.model.Status;
 
 public class NirmataClient {
@@ -24,6 +25,7 @@ public class NirmataClient {
     private static final String GET_ENV_API = "/environments/api/Environment?fields=name,id";
     private static final String GET_APPS_FROM_ENV_API = "/environments/api/Environment/%s/applications?fields=name,id";
     private static final String GET_APPS_FROM_CAT_API = "/catalog/api/applications?fields=name,id";
+    private static final String GET_APPS_STATE_FROM_ENV_API = "/environments/api/applications/%s?fields=id,name,state";
     private static final String DELETE_APPS_FROM_CAT_API = "/environments/api/applications/%s";
     private static final String DEPLOY_APPS_FROM_CAT_API = "/catalog/api/applications/%s/run";
     private static final String UPDATE_APPS_FROM_ENV_API = "/environments/api/applications/%s/import";
@@ -68,8 +70,13 @@ public class NirmataClient {
             if (httpInfo.getStatusCode() == 200) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                response.setModel(
-                    objectMapper.readValue(httpInfo.getPayload(), new TypeReference<List<Model>>() {}));
+                try {
+                    response.setModel(
+                        objectMapper.readValue(httpInfo.getPayload(), new TypeReference<List<Model>>() {}));
+                } catch (Exception e) {
+                    response.setResult(
+                        objectMapper.readValue(httpInfo.getPayload(), Result.class));
+                }
             }
         } catch (Exception e) {
             logger.error("Unable to read Response object", e);
@@ -109,7 +116,23 @@ public class NirmataClient {
         return response;
     }
 
-    public HTTPInfo deleteAppsFromEnvironment(String applicationId) throws AbortException {
+    public Response getAppStateInEnvironment(String applicationID) {
+        Response response = null;
+
+        try {
+            String api = String.format(GET_APPS_STATE_FROM_ENV_API, applicationID);
+            String uri = String.format("https://%s%s", _endpoint, api);
+
+            HTTPInfo httpInfo = HttpClient.doGet(uri, CONTENT_YAML_TYPE, NIRMATA_STR + _apiKey);
+            response = getResponse(httpInfo);
+        } catch (Exception e) {
+            logger.error("Error encountered while getting apps state from environment, {}", e);
+        }
+
+        return response;
+    }
+
+    public HTTPInfo deleteAppInEnvironment(String applicationId) throws AbortException {
         HTTPInfo httpInfo = null;
 
         try {
@@ -125,7 +148,7 @@ public class NirmataClient {
         return httpInfo;
     }
 
-    public HTTPInfo deployAppsInEnvironment(String applicationId, String envName, String appName)
+    public HTTPInfo deployAppInEnvironment(String applicationId, String envName, String appName)
         throws AbortException {
         HTTPInfo httpInfo = null;
 
@@ -146,7 +169,7 @@ public class NirmataClient {
         return httpInfo;
     }
 
-    public HTTPInfo updateAppsInEnvironment(String applicationId, String yamlStr)
+    public HTTPInfo updateAppInEnvironment(String applicationId, String yamlStr)
         throws AbortException {
         HTTPInfo httpInfo = null;
 
@@ -166,7 +189,7 @@ public class NirmataClient {
         return httpInfo;
     }
 
-    public HTTPInfo updateAppsInCatalog(String applicationId, String yamlStr) throws AbortException {
+    public HTTPInfo updateAppInCatalog(String applicationId, String yamlStr) throws AbortException {
         HTTPInfo httpInfo = null;
 
         try {
