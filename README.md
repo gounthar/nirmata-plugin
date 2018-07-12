@@ -1,5 +1,4 @@
 # Nirmata Plugin
-------------
 This plugin enables synchronization of YAML/JSON files stored in a Git repository with a Kubernetes application managed on the Nirmata platform.
 
 Nirmata is a Kubernetes platform that enables enterprises to deliver a highly scalable, always-on container management platform, built on Kubernetes. Using Nirmata, enterprise teams can fully automate the delivery and management of applications. At Nirmata, our mission is to empower all enterprises to easily deliver and manage containerized applications across public and private clouds.
@@ -7,18 +6,15 @@ Nirmata is a Kubernetes platform that enables enterprises to deliver a highly sc
 You can learn more on [Nirmata Website](https://www.nirmata.com/)
 
 ## Features
-------------
 1. Update a running application in an environment
 2. Update an application in a catalog
 3. Deploy an ephemeral application
 4. Delete an ephemeral application
 
 ## General information
-------------
 This Jenkins Plugin supports update/deployment/deletion of applications in Nirmata.
 
 ## Requirement
-------------
 ### Jenkins
 Jenkins 2.107.3 or newer is required.
 
@@ -26,7 +22,6 @@ Jenkins 2.107.3 or newer is required.
 Git 2.17.0 or newer is required.
 
 ## Setup
--------------
 ### Install
 Install this plugin via the Jenkins plugin manager or download the latest version of it from [https://github.com/jenkinsci/nirmata-plugin/releases].
 
@@ -48,7 +43,6 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
     ![api1](https://user-images.githubusercontent.com/39581624/41719183-e85e95ce-757c-11e8-97a1-4f8c0f7d9e18.JPG)
 
 ## Pre-job configuration
--------------
 ### Freestyle job configuration
 
 #### 1. Update a running application in an environment
@@ -170,8 +164,8 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
     ![deleteoutput](https://user-images.githubusercontent.com/39581624/42510609-0bcf9e28-846d-11e8-9243-1f78e27329d7.png)
 
 ## Version history
----------------
 ### Version 1.0.0
-
 - Initial release
+### Version 1.0.1
+- UI Improvements
 
