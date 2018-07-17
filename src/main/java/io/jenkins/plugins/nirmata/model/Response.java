@@ -14,7 +14,7 @@ public class Response {
     }
 
     public void setStatus(Status status) {
-        this._status = status;
+        _status = status;
     }
 
     public List<Model> getModel() {
@@ -22,15 +22,15 @@ public class Response {
     }
 
     public void setModel(List<Model> model) {
-        this._model = model;
+        _model = model;
     }
 
     public Result getResult() {
         return _result;
     }
 
-    public void setResult(Result _result) {
-        this._result = _result;
+    public void setResult(Result result) {
+        _result = result;
     }
 
 }

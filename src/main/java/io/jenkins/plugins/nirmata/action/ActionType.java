@@ -10,16 +10,16 @@ public enum ActionType {
     private String _action;
 
     ActionType(String action) {
-        this._action = action;
+        _action = action;
     }
 
     public String getAction() {
-        return this._action;
+        return _action;
     }
 
     @Override
     public String toString() {
-        return this._action;
+        return _action;
     }
 
     public static ActionType fromString(String action) {

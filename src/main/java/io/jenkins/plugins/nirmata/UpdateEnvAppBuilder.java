@@ -30,62 +30,62 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateEnvAppBuilder.class);
 
-    private final String environment;
-    private final String application;
-    private final String timeout;
-    private final String directories;
-    private final boolean includescheck;
-    private final String includes;
-    private final boolean excludescheck;
-    private final String excludes;
+    private final String _environment;
+    private final String _application;
+    private final String _timeout;
+    private final String _directories;
+    private final boolean _includescheck;
+    private final String _includes;
+    private final boolean _excludescheck;
+    private final String _excludes;
 
     public String getEnvironment() {
-        return environment;
+        return _environment;
     }
 
     public String getApplication() {
-        return application;
+        return _application;
     }
 
     public String getTimeout() {
-        return timeout;
+        return _timeout;
     }
 
     public String getDirectories() {
-        return directories;
+        return _directories;
     }
 
     public boolean isIncludescheck() {
-        return includescheck;
+        return _includescheck;
     }
 
     public String getIncludes() {
-        return includes;
+        return _includes;
     }
 
     public boolean isExcludescheck() {
-        return excludescheck;
+        return _excludescheck;
     }
 
     public String getExcludes() {
-        return excludes;
+        return _excludes;
     }
 
     @DataBoundConstructor
     public UpdateEnvAppBuilder(String endpoint, String apikey, String environment, String application, String timeout,
         String directories, boolean includescheck, String includes, boolean excludescheck, String excludes) {
         super(endpoint, apikey);
-        this.environment = environment;
-        this.application = application;
-        this.timeout = timeout;
-        this.directories = directories;
-        this.includescheck = includescheck;
-        this.includes = includes;
-        this.excludescheck = excludescheck;
-        this.excludes = excludes;
+        _environment = environment;
+        _application = application;
+        _timeout = timeout;
+        _directories = directories;
+        _includescheck = includescheck;
+        _includes = includes;
+        _excludescheck = excludescheck;
+        _excludes = excludes;
     }
 
-    @Symbol("Update App in Environment")
+    @Symbol("updateAppInEnvironment")
     @Extension
     public static final class DescriptorImpl extends BuilderDescriptor {
 

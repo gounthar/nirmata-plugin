@@ -27,26 +27,26 @@ public class NirmataPlugin extends Builder implements SimpleBuildStep {
 
     private static final Logger logger = LoggerFactory.getLogger(NirmataPlugin.class);
 
-    private final ActionBuilder builder;
+    private final ActionBuilder _builder;
 
     public ActionBuilder getBuilder() {
-        return builder;
+        return _builder;
     }
 
     @DataBoundConstructor
     public NirmataPlugin(ActionBuilder builder) {
-        this.builder = builder;
+        _builder = builder;
     }
 
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
         throws InterruptedException, IOException {
         NirmataCredentials credentials = new NirmataCredentials();
-        Optional<StringCredentials> credential = credentials.getCredential(builder.getApikey());
-        NirmataClient client = new NirmataClient(builder.getEndpoint(), credential.get().getSecret().getPlainText());
+        Optional<StringCredentials> credential = credentials.getCredential(_builder.getApikey());
+        NirmataClient client = new NirmataClient(_builder.getEndpoint(), credential.get().getSecret().getPlainText());
 
         Action action = new Action(client, workspace, listener);
-        action.buildStep(builder);
+        action.buildStep(_builder);
     }
 
     @Symbol("nirmata")

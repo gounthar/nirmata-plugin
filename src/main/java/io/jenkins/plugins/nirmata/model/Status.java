@@ -7,8 +7,8 @@ public class Status {
     private String _message;
 
     public Status(int statusCode, String message) {
-        this._statusCode = statusCode;
-        this._message = message;
+        _statusCode = statusCode;
+        _message = message;
     }
 
     public String getMessage() {
@@ -16,7 +16,7 @@ public class Status {
     }
 
     public void setMessage(String message) {
-        this._message = message;
+        _message = message;
     }
 
     public int getStatusCode() {
@@ -24,7 +24,7 @@ public class Status {
     }
 
     public void setStatusCode(int statusCode) {
-        this._statusCode = statusCode;
+        _statusCode = statusCode;
     }
 
 }

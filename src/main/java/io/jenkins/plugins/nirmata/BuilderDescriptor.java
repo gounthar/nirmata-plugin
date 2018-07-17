@@ -5,16 +5,16 @@ import hudson.model.Descriptor;
 
 public class BuilderDescriptor extends Descriptor<ActionBuilder> {
 
-    private transient String displayName;
+    private transient String _displayName;
 
     public BuilderDescriptor(Class<? extends ActionBuilder> clazz, String displayName) {
         super(clazz);
-        this.displayName = displayName;
+        _displayName = displayName;
     }
 
     @Override
     public String getDisplayName() {
-        return displayName;
+        return _displayName;
     }
 
     @Override

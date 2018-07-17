@@ -168,4 +168,6 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
 - Initial release
 ### Version 1.0.1
 - UI Improvements
+### Version 1.0.3
+- Pipeline support added
 

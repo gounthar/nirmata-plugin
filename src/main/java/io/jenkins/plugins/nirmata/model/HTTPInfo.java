@@ -25,7 +25,7 @@ public class HTTPInfo {
     }
 
     public void setUri(String uri) {
-        this._uri = uri;
+        _uri = uri;
     }
 
     public String getMethod() {
@@ -33,7 +33,7 @@ public class HTTPInfo {
     }
 
     public void setMethod(String method) {
-        this._method = method;
+        _method = method;
     }
 
     public int getStatusCode() {
@@ -41,7 +41,7 @@ public class HTTPInfo {
     }
 
     public void setStatusCode(int httpStatusCode) {
-        this._statusCode = httpStatusCode;
+        _statusCode = httpStatusCode;
     }
 
     public String getMessage() {
@@ -49,7 +49,7 @@ public class HTTPInfo {
     }
 
     public void setMessage(String httpMessage) {
-        this._message = httpMessage;
+        _message = httpMessage;
     }
 
     public String getEntity() {
@@ -57,7 +57,7 @@ public class HTTPInfo {
     }
 
     public void setEntity(String entity) {
-        this._entity = entity;
+        _entity = entity;
     }
 
     public String getPayload() {
@@ -65,7 +65,7 @@ public class HTTPInfo {
     }
 
     public void setPayload(String payload) {
-        this._payload = payload;
+        _payload = payload;
     }
 
     @JsonIgnore

@@ -11,20 +11,20 @@ public abstract class ActionBuilder extends AbstractDescribableImpl<ActionBuilde
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteEnvAppBuilder.class);
 
-    private final String endpoint;
-    private final String apikey;
+    private final String _endpoint;
+    private final String _apikey;
 
     public String getEndpoint() {
-        return endpoint;
+        return _endpoint;
     }
 
     public String getApikey() {
-        return apikey;
+        return _apikey;
     }
 
     protected ActionBuilder(String endpoint, String apikey) {
-        this.endpoint = endpoint;
-        this.apikey = apikey;
+        _endpoint = endpoint;
+        _apikey = apikey;
     }
 
 }

@@ -30,38 +30,38 @@ public class DeployEnvAppBuilder extends ActionBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(DeployEnvAppBuilder.class);
 
-    private final String environment;
-    private final String application;
-    private final String timeout;
-    private final String catalog;
+    private final String _environment;
+    private final String _application;
+    private final String _timeout;
+    private final String _catalog;
 
     public String getEnvironment() {
-        return environment;
+        return _environment;
     }
 
     public String getApplication() {
-        return application;
+        return _application;
     }
 
     public String getTimeout() {
-        return timeout;
+        return _timeout;
     }
 
     public String getCatalog() {
-        return catalog;
+        return _catalog;
     }
 
     @DataBoundConstructor
     public DeployEnvAppBuilder(String endpoint, String apikey, String environment, String application, String timeout,
         String catalog) {
         super(endpoint, apikey);
-        this.environment = environment;
-        this.application = application;
-        this.timeout = timeout;
-        this.catalog = catalog;
+        _environment = environment;
+        _application = application;
+        _timeout = timeout;
+        _catalog = catalog;
     }
 
-    @Symbol("Deploy App in Environment")
+    @Symbol("deployAppInEnvironment")
     @Extension
     public static final class DescriptorImpl extends BuilderDescriptor {
 

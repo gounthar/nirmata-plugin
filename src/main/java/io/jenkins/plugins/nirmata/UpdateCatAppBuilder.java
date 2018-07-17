@@ -30,56 +30,56 @@ public class UpdateCatAppBuilder extends ActionBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateCatAppBuilder.class);
 
-    private final String catalog;
-    private final String timeout;
-    private final String directories;
-    private final boolean includescheck;
-    private final String includes;
-    private final boolean excludescheck;
-    private final String excludes;
+    private final String _catalog;
+    private final String _timeout;
+    private final String _directories;
+    private final boolean _includescheck;
+    private final String _includes;
+    private final boolean _excludescheck;
+    private final String _excludes;
 
     public String getCatalog() {
-        return catalog;
+        return _catalog;
     }
 
     public String getTimeout() {
-        return timeout;
+        return _timeout;
     }
 
     public String getDirectories() {
-        return directories;
+        return _directories;
     }
 
     public boolean isIncludescheck() {
-        return includescheck;
+        return _includescheck;
     }
 
     public String getIncludes() {
-        return includes;
+        return _includes;
     }
 
     public boolean isExcludescheck() {
-        return excludescheck;
+        return _excludescheck;
     }
 
     public String getExcludes() {
-        return excludes;
+        return _excludes;
     }
 
     @DataBoundConstructor
     public UpdateCatAppBuilder(String endpoint, String apikey, String catalog, String timeout, String directories,
         boolean includescheck, String includes, boolean excludescheck, String excludes) {
         super(endpoint, apikey);
-        this.catalog = catalog;
-        this.timeout = timeout;
-        this.directories = directories;
-        this.includescheck = includescheck;
-        this.includes = includes;
-        this.excludescheck = excludescheck;
-        this.excludes = excludes;
+        _catalog = catalog;
+        _timeout = timeout;
+        _directories = directories;
+        _includescheck = includescheck;
+        _includes = includes;
+        _excludescheck = excludescheck;
+        _excludes = excludes;
     }
 
-    @Symbol("Update App in Catalog")
+    @Symbol("updateAppInCatalog")
     @Extension
     public static final class DescriptorImpl extends BuilderDescriptor {
 
