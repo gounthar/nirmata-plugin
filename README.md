@@ -162,6 +162,32 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
 - The ‘Delete App in Environment’ build step is marked successful if the application is deleted successfully else it is marked as failed if any issue is encountered
 
     ![deleteoutput](https://user-images.githubusercontent.com/39581624/42510609-0bcf9e28-846d-11e8-9243-1f78e27329d7.png)
+    
+### Pipeline workflow
+
+- Create a new pipeline
+- Select ‘Hello World’ from the side drop-down under the section ‘Pipeline’ and click on ‘Pipeline Syntax’
+
+    ![pipeline](https://user-images.githubusercontent.com/39581624/42921871-e0839b18-8b3b-11e8-924a-88feaa102a37.JPG)
+    
+- Select ‘git: Git’ from the ‘Sample Step’ drop-down. Enter the URL of the GitHub repository. Specify the branch name of the repository. Click on ‘Generate Pipeline Script’ and copy the script generated. Note that this is required only for the ‘Update’ actions
+
+    ![samplestep-git](https://user-images.githubusercontent.com/39581624/42927801-2fa5c560-8b53-11e8-98cb-8b32f5e36aa0.JPG)
+    
+- Select ‘nirmata: Invoke Nirmata Service’ from the ‘Sample Step’ drop-down, select the required action from the drop-down and select\enter the appropriate parameters. Click on ‘Generate Pipeline Script’ and copy the script generated
+  
+    ![samplestep-nirmata](https://user-images.githubusercontent.com/39581624/42927804-32132e6e-8b53-11e8-9022-188a5f0ee91f.JPG)
+    
+- Add the scripts generated above inside 'node' script as shown below
+
+    ![pipelinescript](https://user-images.githubusercontent.com/39581624/42934507-09319b4a-8b65-11e8-9cf5-3965e24e4d5e.JPG)
+
+- Save/Apply configuration of job and execute an initial build by triggering ‘Build Now’ from the side panel
+
+    ![outputpipeline](https://user-images.githubusercontent.com/39581624/42928201-4bcc31ec-8b54-11e8-97aa-e0d073e8cf16.png)
+    
+
+**Note:** Similar workflows can be generated for 'Update App in Catalog'/'Deploy App in Environment'/'Delete App in Environment' actions.
 
 ## Version history
 ### Version 1.0.0
