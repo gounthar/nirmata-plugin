@@ -17,21 +17,21 @@
     </f:entry>
 
     <f:entry title="Timeout" field="timeout" help="/plugin/nirmata/help-timeout.html">
-        <f:textbox default="0"/>
+        <f:number clazz="required number" default="0" min="0" max="20"/>
     </f:entry>
 
     <f:entry title="List of Directories" field="directories" help="/plugin/nirmata/help-directories.html">
         <f:textbox/>
     </f:entry>
 
-    <f:optionalBlock field="includescheck" title="Include File Pattern" inline="true">
-        <f:entry field="includes" help="/plugin/nirmata/help-includes.html">
+    <f:optionalBlock field="includescheck" title="Include File Pattern" inline="true" help="/plugin/nirmata/help-includes.html">
+        <f:entry field="includes">
             <f:textbox/>
         </f:entry>
     </f:optionalBlock>
 
-    <f:optionalBlock field="excludescheck" title="Exclude File Pattern" inline="true">
-        <f:entry field="excludes" help="/plugin/nirmata/help-excludes.html">
+    <f:optionalBlock field="excludescheck" title="Exclude File Pattern" inline="true" help="/plugin/nirmata/help-excludes.html">
+        <f:entry field="excludes">
             <f:textbox/>
         </f:entry>
     </f:optionalBlock>

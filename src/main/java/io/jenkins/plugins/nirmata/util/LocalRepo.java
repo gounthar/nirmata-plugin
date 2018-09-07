@@ -21,15 +21,13 @@ public class LocalRepo {
     }
 
     public static List<String> getFilesInDirectory(List<String> directories, String includes, String excludes) {
-
         List<String> listOfFiles = new ArrayList<String>();
-        String includesWithYamlnJson = String.format("*.yaml,*.yml,*.json%s",
-            Strings.isNullOrEmpty(includes) ? "" : "," + includes);
+        String finalIncludes = String.format("%s", Strings.isNullOrEmpty(includes) ? "*.yaml,*.yml,*.json" : includes);
 
         for (String directory : directories) {
             try {
                 FilePath filePath = new FilePath(new File(directory));
-                FilePath[] files = filePath.list(includesWithYamlnJson, excludes);
+                FilePath[] files = filePath.list(finalIncludes, excludes);
 
                 for (FilePath file : files) {
                     listOfFiles.add(directory + "/" + file.getName());

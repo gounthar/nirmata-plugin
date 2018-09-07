@@ -12,15 +12,39 @@
         <f:select/>
     </f:entry>
 
-    <f:entry title="Catalog Application" field="catalog" help="/plugin/nirmata/help-catalog.html">
-        <f:select/>
-    </f:entry>
-
     <f:entry title="Name for Application" field="application" help="/plugin/nirmata/help-nameforapplication.html">
         <f:textbox/>
     </f:entry>
 
     <f:entry title="Timeout" field="timeout" help="/plugin/nirmata/help-timeout.html">
-        <f:textbox default="0"/>
+        <f:number clazz="required number" default="0" min="0" max="20"/>
     </f:entry>
+
+    <f:radioBlock name="deployType" value="CATALOG" checked="${instance == null || instance.deployType == 'CATALOG'}"
+                  title="Deploy from Catalog" inline="true">
+        <f:entry title="Catalog Application" field="catalog" help="/plugin/nirmata/help-catalog.html">
+            <f:select/>
+        </f:entry>
+    </f:radioBlock>
+
+    <f:radioBlock name="deployType" value="FILES" checked="${instance.deployType == 'FILES'}"
+                  title="Deploy from File(s)" inline="true">
+        <f:block>
+            <f:entry title="List of Directories" field="directories" help="/plugin/nirmata/help-directories.html">
+                <f:textbox/>
+            </f:entry>
+
+            <f:optionalBlock field="includescheck" title="Include File Pattern" inline="true" help="/plugin/nirmata/help-includes.html">
+                <f:entry field="includes">
+                    <f:textbox/>
+                </f:entry>
+            </f:optionalBlock>
+
+            <f:optionalBlock field="excludescheck" title="Exclude File Pattern" inline="true" help="/plugin/nirmata/help-excludes.html">
+                <f:entry field="excludes">
+                    <f:textbox/>
+                </f:entry>
+            </f:optionalBlock>
+        </f:block>
+    </f:radioBlock>
 </j:jelly>

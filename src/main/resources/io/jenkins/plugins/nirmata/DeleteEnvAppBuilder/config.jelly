@@ -17,6 +17,6 @@
     </f:entry>
 
     <f:entry title="Timeout" field="timeout" help="/plugin/nirmata/help-timeout.html">
-        <f:textbox default="0"/>
+        <f:number clazz="required number" default="0" min="0" max="20"/>
     </f:entry>
 </j:jelly>

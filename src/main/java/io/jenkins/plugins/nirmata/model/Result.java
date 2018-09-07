@@ -10,6 +10,7 @@ public class Result {
     private String _id;
     private String _name;
     private String _state;
+    private String _execState;
 
     public String getStatus() {
         return _status;
@@ -65,6 +66,14 @@ public class Result {
 
     public void setState(String state) {
         _state = state;
+    }
+    
+    public String getExecutionState() {
+    	return _execState;
+    }
+    
+    public void setExecutionState(String execState) {
+    	this._execState = execState;
     }
 
 }

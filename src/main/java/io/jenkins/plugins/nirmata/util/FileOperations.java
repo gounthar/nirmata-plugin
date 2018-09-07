@@ -20,14 +20,25 @@ public class FileOperations {
 
     }
 
-    public static List<String> getList(String listOfNames) {
-        if (Strings.isNullOrEmpty(listOfNames)) {
-            return null;
+    public static List<String> getDirectories(String basePath, String commaSeparatedDirectories) {
+        List<String> listOfDirectories = new ArrayList<>();
+        List<String> directories = getList(commaSeparatedDirectories);
+
+        for (String directory : directories) {
+            String directoryWithPathIncluded = appendBasePath(basePath, directory);
+            listOfDirectories.add(directoryWithPathIncluded);
         }
 
+        return listOfDirectories;
+    }
+
+    public static List<String> getList(String listOfNames) {
         List<String> names = new ArrayList<>();
-        for (String name : listOfNames.split(",")) {
-            names.add(name.trim());
+
+        if (!Strings.isNullOrEmpty(listOfNames)) {
+            for (String name : listOfNames.split(",")) {
+                names.add(name.trim());
+            }
         }
 
         return names;
@@ -62,8 +73,9 @@ public class FileOperations {
         return fileContent;
     }
 
-    public static String appendBasePath(String basePath, String relativePath) {
+    private static String appendBasePath(String basePath, String relativePath) {
         String appendedPath = null;
+
         if (!relativePath.startsWith(basePath)) {
             appendedPath = basePath.trim() + "/" + relativePath.trim();
         } else {

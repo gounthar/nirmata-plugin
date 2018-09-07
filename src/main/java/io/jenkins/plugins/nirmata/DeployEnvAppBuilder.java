@@ -32,8 +32,35 @@ public class DeployEnvAppBuilder extends ActionBuilder {
 
     private final String _environment;
     private final String _application;
-    private final String _timeout;
+    private final Integer _timeout;
+    private final String _deployType;
     private final String _catalog;
+    private final String _directories;
+    private final boolean _includescheck;
+    private final String _includes;
+    private final boolean _excludescheck;
+    private final String _excludes;
+
+    public enum DeployType {
+        CATALOG, FILES
+    }
+    
+    @DataBoundConstructor
+    public DeployEnvAppBuilder(String endpoint, String apikey, String environment, String application, Integer timeout,
+        String catalog, String directories, boolean includescheck, String includes, boolean excludescheck,
+        String excludes, String deployType) {
+        super(endpoint, apikey);
+        _environment = environment;
+        _application = application;
+        _timeout = timeout;
+        _catalog = catalog;
+        _directories = directories;
+        _includescheck = includescheck;
+        _includes = includes;
+        _excludescheck = excludescheck;
+        _excludes = excludes;
+        _deployType = deployType == null ? DeployType.CATALOG.toString() : deployType;
+    }
 
     public String getEnvironment() {
         return _environment;
@@ -43,22 +70,36 @@ public class DeployEnvAppBuilder extends ActionBuilder {
         return _application;
     }
 
-    public String getTimeout() {
+    public Integer getTimeout() {
         return _timeout;
+    }
+
+    public String getDeployType() {
+        return _deployType;
     }
 
     public String getCatalog() {
         return _catalog;
     }
 
-    @DataBoundConstructor
-    public DeployEnvAppBuilder(String endpoint, String apikey, String environment, String application, String timeout,
-        String catalog) {
-        super(endpoint, apikey);
-        _environment = environment;
-        _application = application;
-        _timeout = timeout;
-        _catalog = catalog;
+    public String getDirectories() {
+        return _directories;
+    }
+
+    public boolean isIncludescheck() {
+        return _includescheck;
+    }
+
+    public String getIncludes() {
+        return _includes;
+    }
+
+    public boolean isExcludescheck() {
+        return _excludescheck;
+    }
+
+    public String getExcludes() {
+        return _excludes;
     }
 
     @Symbol("deployAppInEnvironment")
@@ -104,11 +145,6 @@ public class DeployEnvAppBuilder extends ActionBuilder {
             }
         }
 
-        public FormValidation doCheckTimeout(@QueryParameter int timeout) {
-            return timeout >= 0 && timeout <= 20 ? FormValidation.ok()
-                : FormValidation.error("Timeout cannot be less than 0 or greater than 20 mins");
-        }
-
         @SuppressWarnings("deprecation")
         public ListBoxModel doFillApikeyItems() {
             if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
@@ -131,7 +167,9 @@ public class DeployEnvAppBuilder extends ActionBuilder {
             Status status = client.getEnvironments().getStatus();
 
             if (status.getStatusCode() == HttpServletResponse.SC_OK) {
-                if (environments != null) {
+                if (environments != null && !environments.isEmpty()) {
+                    models.add(new ListBoxModel.Option("Select environment", null, false));
+
                     for (Model model : environments) {
                         models.add(model.getName());
                     }
@@ -155,7 +193,9 @@ public class DeployEnvAppBuilder extends ActionBuilder {
             Status status = client.getAppsFromCatalog().getStatus();
 
             if (status.getStatusCode() == HttpServletResponse.SC_OK) {
-                if (catalogApplications != null) {
+                if (catalogApplications != null && !catalogApplications.isEmpty()) {
+                    models.add(new ListBoxModel.Option("Select catalog", null, false));
+
                     for (Model model : catalogApplications) {
                         models.add(model.getName());
                     }

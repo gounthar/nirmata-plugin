@@ -32,7 +32,7 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
 
     private final String _environment;
     private final String _application;
-    private final String _timeout;
+    private final Integer _timeout;
     private final String _directories;
     private final boolean _includescheck;
     private final String _includes;
@@ -47,7 +47,7 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
         return _application;
     }
 
-    public String getTimeout() {
+    public Integer getTimeout() {
         return _timeout;
     }
 
@@ -72,7 +72,7 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
     }
 
     @DataBoundConstructor
-    public UpdateEnvAppBuilder(String endpoint, String apikey, String environment, String application, String timeout,
+    public UpdateEnvAppBuilder(String endpoint, String apikey, String environment, String application, Integer timeout,
         String directories, boolean includescheck, String includes, boolean excludescheck, String excludes) {
         super(endpoint, apikey);
         _environment = environment;
@@ -128,11 +128,6 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
             }
         }
 
-        public FormValidation doCheckTimeout(@QueryParameter int timeout) {
-            return timeout >= 0 && timeout <= 20 ? FormValidation.ok()
-                : FormValidation.error("Timeout cannot be less than 0 or greater than 20 mins");
-        }
-
         @SuppressWarnings("deprecation")
         public ListBoxModel doFillApikeyItems() {
             if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
@@ -155,7 +150,9 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
             Status status = client.getEnvironments().getStatus();
 
             if (status.getStatusCode() == HttpServletResponse.SC_OK) {
-                if (environments != null) {
+                if (environments != null && !environments.isEmpty()) {
+                    models.add(new ListBoxModel.Option("Select environment", null, false));
+
                     for (Model model : environments) {
                         models.add(model.getName());
                     }
@@ -190,9 +187,11 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
                 Status status = client.getAppsFromEnvironment(environmentId).getStatus();
 
                 if (status.getStatusCode() == HttpServletResponse.SC_OK) {
-                    if (!(applications == null || applications.isEmpty())) {
+                    if (applications != null && !applications.isEmpty()) {
+                        models.add(new ListBoxModel.Option("Select application", null, false));
+
                         for (Model model : applications) {
-                            models.add(model.getName());
+                            models.add(model.getRun());
                         }
                     } else {
                         models.add(new ListBoxModel.Option("--- No applications found ---", null, false));
@@ -202,7 +201,6 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
 
             return models;
         }
-
     }
 
 }

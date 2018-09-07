@@ -9,7 +9,7 @@ import hudson.model.AbstractDescribableImpl;
 
 public abstract class ActionBuilder extends AbstractDescribableImpl<ActionBuilder> implements ExtensionPoint {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeleteEnvAppBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(ActionBuilder.class);
 
     private final String _endpoint;
     private final String _apikey;

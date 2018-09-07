@@ -31,7 +31,7 @@ public class UpdateCatAppBuilder extends ActionBuilder {
     private static final Logger logger = LoggerFactory.getLogger(UpdateCatAppBuilder.class);
 
     private final String _catalog;
-    private final String _timeout;
+    private final Integer _timeout;
     private final String _directories;
     private final boolean _includescheck;
     private final String _includes;
@@ -42,7 +42,7 @@ public class UpdateCatAppBuilder extends ActionBuilder {
         return _catalog;
     }
 
-    public String getTimeout() {
+    public Integer getTimeout() {
         return _timeout;
     }
 
@@ -67,7 +67,7 @@ public class UpdateCatAppBuilder extends ActionBuilder {
     }
 
     @DataBoundConstructor
-    public UpdateCatAppBuilder(String endpoint, String apikey, String catalog, String timeout, String directories,
+    public UpdateCatAppBuilder(String endpoint, String apikey, String catalog, Integer timeout, String directories,
         boolean includescheck, String includes, boolean excludescheck, String excludes) {
         super(endpoint, apikey);
         _catalog = catalog;
@@ -121,11 +121,6 @@ public class UpdateCatAppBuilder extends ActionBuilder {
             }
         }
 
-        public FormValidation doCheckTimeout(@QueryParameter int timeout) {
-            return timeout >= 0 && timeout <= 20 ? FormValidation.ok()
-                : FormValidation.error("Timeout cannot be less than 0 or greater than 20 mins");
-        }
-
         @SuppressWarnings("deprecation")
         public ListBoxModel doFillApikeyItems() {
             if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
@@ -148,7 +143,9 @@ public class UpdateCatAppBuilder extends ActionBuilder {
             Status status = client.getAppsFromCatalog().getStatus();
 
             if (status.getStatusCode() == HttpServletResponse.SC_OK) {
-                if (catalogApplications != null) {
+                if (catalogApplications != null && !catalogApplications.isEmpty()) {
+                    models.add(new ListBoxModel.Option("Select catalog", null, false));
+
                     for (Model model : catalogApplications) {
                         models.add(model.getName());
                     }
@@ -159,7 +156,6 @@ public class UpdateCatAppBuilder extends ActionBuilder {
 
             return models;
         }
-
     }
 
 }
