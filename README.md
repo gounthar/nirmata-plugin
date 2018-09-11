@@ -74,13 +74,13 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
     
     - **Exclude File Pattern**- Add filename/extension/regex for files in the mentioned directories that should be excluded for updating an application. Note that multiple filename/extension/regex can be excluded using comma separator.    
     
-    ![updatebuildea](https://user-images.githubusercontent.com/39581624/42504572-db8583e4-8459-11e8-8a6a-d7ff3cff3afa.JPG)
+    ![updatebuildea](https://user-images.githubusercontent.com/39581624/45298233-8b487880-b525-11e8-86f5-6cc82df731e1.png)
     
 - Save/Apply configuration of the job
 - This job would be triggered on detection of a commit/change in the specified Git repo
 - The ‘Update App in Environment’ build step is marked successful if all the YAML/JSON files are imported successfully else it is marked as failed if any issue is encountered
         
-    ![updateeaoutput](https://user-images.githubusercontent.com/39581624/42510304-1b3f0c00-846c-11e8-9b68-510ddc908408.png)
+    ![updateeaoutput](https://user-images.githubusercontent.com/39581624/45298321-c8ad0600-b525-11e8-823f-103a38f734cf.png)
 
 #### 2. Update an application in a catalog
 
@@ -109,13 +109,13 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
     
     - **Exclude File Pattern**- Add filename/extension/regex for files in the mentioned directories that should be excluded for updating an application. Note that multiple filename/extension/regex can be excluded using comma separator.
 
-    ![updatebuildca](https://user-images.githubusercontent.com/39581624/42504577-de796bba-8459-11e8-91ac-80f2be786f11.JPG)
+    ![updatebuildca](https://user-images.githubusercontent.com/39581624/45298505-52f56a00-b526-11e8-91ea-db9d149a2b67.png)
 
 - Save/Apply configuration of the job
 - This job would be triggered on detection of a commit/change in the specified Git repo
 - The ‘Update App in Catalog’ build step is marked successful if all the YAML/JSON files are imported successfully else it is marked as failed if any issue is encountered
 
-    ![updatecaoutput](https://user-images.githubusercontent.com/39581624/42510394-61a7e716-846c-11e8-830d-b56677e9bdf0.png)
+    ![updatecaoutput](https://user-images.githubusercontent.com/39581624/45298927-969ca380-b527-11e8-8dfb-29153128ad2d.png)
 
 #### 3. Deploy an ephemeral application
 
@@ -128,18 +128,28 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
     
     - **Existing Environments** - Select environment from the list in the drop-down
     
-    - **Catalog Applications** - Select the application which should be deployed, from the dropdown
-    
     - **Name for the application** - Specify the name by which the application should be deployed in the platform
     
     - **Timeout** - Enter a time period to wait to pull the result from Nirmata
     
-    ![deploybuild](https://user-images.githubusercontent.com/39581624/42504588-e55e7a1a-8459-11e8-8138-4b97c12e7701.JPG)
+    - Select **'Deploy from catalog'** if the application should be deployed from the Nirmata catalog
+    
+    - **Catalog Applications** - Select the application which should be deployed, from the dropdown
+    
+    - Select **'Deploy from File(s)'** if the application should be deployed using .yaml/.json/.yml
+    
+        - **List of directories** - Enter the relative path of the directory w.r.t locally stored repository containing YAML/JSON files. Multiple directories can be included using comma separator.
+    
+        - **Include File Pattern** - Add filename/extension/regex that should also be included for updating an application. By default, all .yaml, .yml, .json files present in the specified directories above would be included. Note that multiple filename/extension/regex can be included using comma separator.    
+    
+        - **Exclude File Pattern**- Add filename/extension/regex for files in the mentioned directories that should be excluded for updating an application. Note that multiple filename/extension/regex can be excluded using comma separator.
+    
+    ![deploybuild](https://user-images.githubusercontent.com/39581624/45298639-be3f3c00-b526-11e8-88f2-f46d5aa759cd.png)
 
 - Save/Apply configuration of job and execute an initial build by triggering ‘Build Now’ from the side panel
 - The ‘Deploy App in Environment’ build step is marked successful if the application deployed in the environment else it is marked as failed if any issue is encountered
 
-    ![deployoutput](https://user-images.githubusercontent.com/39581624/42509867-de3afc3e-846a-11e8-849d-742db5b54a73.png)
+    ![deployoutput](https://user-images.githubusercontent.com/39581624/45298664-d9aa4700-b526-11e8-9478-faa310c800e2.png)
 
 #### 4. Delete an ephemeral application
 
@@ -156,12 +166,12 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
     
     - **Timeout** - Enter a time period to wait to pull the result from Nirmata
     
-    ![deletebuild](https://user-images.githubusercontent.com/39581624/42504594-e704a1aa-8459-11e8-9783-9cccb6b2181b.JPG)
+    ![deletebuild](https://user-images.githubusercontent.com/39581624/45299015-d9f71200-b527-11e8-9d4a-e4697b40258c.png)
 
 - Save/Apply configuration of job and execute an initial build by triggering ‘Build Now’ from the side panel
 - The ‘Delete App in Environment’ build step is marked successful if the application is deleted successfully else it is marked as failed if any issue is encountered
 
-    ![deleteoutput](https://user-images.githubusercontent.com/39581624/42510609-0bcf9e28-846d-11e8-9243-1f78e27329d7.png)
+    ![deleteoutput](https://user-images.githubusercontent.com/39581624/45299036-ed09e200-b527-11e8-9ae6-2c5540022a20.png)
     
 ### Pipeline workflow
 
@@ -176,15 +186,15 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
     
 - Select ‘nirmata: Invoke Nirmata Service’ from the ‘Sample Step’ drop-down, select the required action from the drop-down and select\enter the appropriate parameters. Click on ‘Generate Pipeline Script’ and copy the script generated
   
-    ![samplestep-nirmata](https://user-images.githubusercontent.com/39581624/42927804-32132e6e-8b53-11e8-9022-188a5f0ee91f.JPG)
+    ![samplestep-nirmata](https://user-images.githubusercontent.com/39581624/45299253-9c46b900-b528-11e8-975d-b76031c5e2ca.png)
     
 - Add the scripts generated above inside 'node' script as shown below
 
-    ![pipelinescript](https://user-images.githubusercontent.com/39581624/42934507-09319b4a-8b65-11e8-9cf5-3965e24e4d5e.JPG)
+    ![pipelinescript](https://user-images.githubusercontent.com/39581624/45299510-808fe280-b529-11e8-9818-1eb79ab0d266.png)
 
 - Save/Apply configuration of job and execute an initial build by triggering ‘Build Now’ from the side panel
 
-    ![outputpipeline](https://user-images.githubusercontent.com/39581624/42928201-4bcc31ec-8b54-11e8-97aa-e0d073e8cf16.png)
+    ![outputpipeline](https://user-images.githubusercontent.com/39581624/45299586-af0dbd80-b529-11e8-9ca3-3efd4a288bbc.png)
     
 
 **Note:** Similar workflows can be generated for 'Update App in Catalog'/'Deploy App in Environment'/'Delete App in Environment' actions.
@@ -196,4 +206,7 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
 - UI Improvements
 ### Version 1.0.3
 - Pipeline support added
+### Version 1.0.4
+- Improvements and support deployment of application through file added
+
 
