@@ -240,6 +240,7 @@ public final class Action {
             "Environment: " + environment,
             "Application: " + application,
             "Timeout: " + timeout,
+            "Directories: " + directories,
             "Includes: " + includes,
             "Excludes: " + excludes);
 
