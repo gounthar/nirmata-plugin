@@ -1,16 +1,13 @@
-
 package io.jenkins.plugins.nirmata.util;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FileOperations {
 
@@ -52,20 +49,21 @@ public class FileOperations {
                 String fileContent = readFile(file);
                 stringBuffer.append(fileContent);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.error("Failed to read files, ", e);
+            throw new RuntimeException(e);
         }
 
         return stringBuffer.toString();
     }
 
-    public static String readFile(String fileName) throws Exception {
+    public static String readFile(String fileName) {
         String fileContent = null;
 
         try {
             fileContent = IOUtils.toString(new FileInputStream(fileName));
             logger.debug("Read file {} content: {}", fileName, fileContent);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             logger.error("Failed to read file {}: ", fileName, e);
             throw new RuntimeException(e);
         }
