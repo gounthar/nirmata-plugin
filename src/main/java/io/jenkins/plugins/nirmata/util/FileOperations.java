@@ -1,13 +1,19 @@
+
 package io.jenkins.plugins.nirmata.util;
 
-import com.google.common.base.Strings;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.io.IOUtils;
+import org.jenkinsci.remoting.RoleChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Strings;
+
+import hudson.FilePath;
+import hudson.remoting.VirtualChannel;
 
 public class FileOperations {
 
@@ -61,7 +67,8 @@ public class FileOperations {
         String fileContent = null;
 
         try {
-            fileContent = IOUtils.toString(new FileInputStream(fileName));
+            FilePath file = new FilePath(new File(fileName));
+            fileContent = file.act(new ReadFile());
             logger.debug("Read file {} content: {}", fileName, fileContent);
         } catch (Throwable e) {
             logger.error("Failed to read file {}: ", fileName, e);
@@ -81,5 +88,21 @@ public class FileOperations {
         }
 
         return appendedPath;
+    }
+
+    private static final class ReadFile implements FilePath.FileCallable<String> {
+
+        private static final long serialVersionUID = -8139299035803023641L;
+
+        @Override
+        public String invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+            logger.debug("File = {}", f.getPath());
+            return IOUtils.toString(new FileInputStream(f.getPath()));
+        }
+
+        @Override
+        public void checkRoles(RoleChecker checker) throws SecurityException {
+
+        }
     }
 }
