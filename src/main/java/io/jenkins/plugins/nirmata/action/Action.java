@@ -1,14 +1,18 @@
 
 package io.jenkins.plugins.nirmata.action;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringEscapeUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
@@ -27,6 +31,7 @@ public final class Action {
     private final NirmataClient _client;
     private final FilePath _workspace;
     private final PrintStream _logger;
+    private HTTPInfo _httpInfo;
 
     public Action(NirmataClient client, FilePath workspace, TaskListener listener) {
         _client = client;
@@ -46,7 +51,7 @@ public final class Action {
         return _logger;
     }
 
-    public void buildStep(ActionBuilder builder) throws AbortException {
+    public hudson.model.Result buildStep(ActionBuilder builder) throws AbortException {
         printSeparator();
 
         if (builder instanceof UpdateEnvAppBuilder) {
@@ -79,6 +84,26 @@ public final class Action {
         } else {
             throw new AbortException("Unknown action request!");
         }
+
+        return verifyActionStatus();
+    }
+
+    private hudson.model.Result verifyActionStatus() {
+        hudson.model.Result result = hudson.model.Result.SUCCESS;
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            Payload payload = objectMapper.readValue(_httpInfo.getPayload(), Payload.class);
+            if (payload.getStatus() != HttpServletResponse.SC_OK) {
+                result = hudson.model.Result.FAILURE;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
     private void update(String catalog, String directories, String includes, String excludes, Integer timeout)
@@ -109,33 +134,13 @@ public final class Action {
             printFiles(listOfFiles);
 
             String yamlStr = FileOperations.appendFiles(listOfFiles);
-            HTTPInfo result = _client.updateAppInCatalog(applicationId, yamlStr);
+            _httpInfo = _client.updateAppInCatalog(applicationId, yamlStr);
 
-            printInfo(result.toString());
+            printInfo(_httpInfo.toString());
         } else {
             throw new AbortException(
                 String.format("Unable to update application in catalog, {%s}. ApplicationId is null",
                     catalog));
-        }
-    }
-
-    private void printSeparator() {
-        for (int i = 0; i++ < NUM_OF_UNDERSCORES;) {
-            _logger.print('-');
-        }
-    }
-
-    private void printInfo(String... vargs) {
-        _logger.println();
-        for (String varg : vargs) {
-            _logger.println(varg);
-        }
-    }
-
-    private void printFiles(List<String> listOfFiles) {
-        _logger.println("List of " + listOfFiles.size() + " files:");
-        for (String file : listOfFiles) {
-            _logger.println(file);
         }
     }
 
@@ -186,11 +191,11 @@ public final class Action {
             printFiles(listOfFiles);
 
             String yamlStr = FileOperations.appendFiles(listOfFiles);
-            HTTPInfo result = _client.updateAppInEnvironment(applicationId, yamlStr);
+            _httpInfo = _client.updateAppInEnvironment(applicationId, yamlStr);
 
-            printInfo(result.toString());
+            printInfo(_httpInfo.toString());
 
-            String resultPayload = result.getPayload();
+            String resultPayload = _httpInfo.getPayload();
             if (getInfo(resultPayload, "message").equals("Success")) {
 
                 HTTPInfo changes = _client.getChangesFromChangeRequest(getInfo(resultPayload, "changesRequestId"));
@@ -263,21 +268,21 @@ public final class Action {
                     String.format("Unable to deploy application, {%s}. EnvironmentId is null", application));
             }
 
-            HTTPInfo result = _client.deployAppFromFiles(environmentId, application, yamlStr);
-            printInfo(result.toString());
+            _httpInfo = _client.deployAppFromFiles(environmentId, application, yamlStr);
+            printInfo(_httpInfo.toString());
 
-            if (getInfo(result.getPayload(), "message").equals("Success")) {
-                String taskState = checkSystemTaskState(timeout, getInfo(result.getPayload(), "sequenceId"));
+            if (getInfo(_httpInfo.getPayload(), "message").equals("Success")) {
+                String taskState = checkSystemTaskState(timeout, getInfo(_httpInfo.getPayload(), "sequenceId"));
                 printInfo("System Task State: " + taskState);
 
                 if (taskState.equals("failed")) {
-                    printError(getInfo(result.getPayload(), "sequenceId"));
+                    printError(getInfo(_httpInfo.getPayload(), "sequenceId"));
 
                 } else if (taskState.equals("completed")) {
-                    Response response = _client.getResponse(result);
+                    Response response = _client.getResponse(_httpInfo);
 
                     if (response != null) {
-                        String status = checkStatus(timeout, getInfo(result.getPayload(), "applicationId"));
+                        String status = checkStatus(timeout, getInfo(_httpInfo.getPayload(), "applicationId"));
                         printInfo("Action Status: " + status);
                     }
                 }
@@ -307,10 +312,10 @@ public final class Action {
         }
 
         if (!Strings.isNullOrEmpty(applicationId)) {
-            HTTPInfo result = _client.deployAppFromCatalog(applicationId, environment, application);
-            printInfo(result.toString());
+            _httpInfo = _client.deployAppFromCatalog(applicationId, environment, application);
+            printInfo(_httpInfo.toString());
 
-            Response response = _client.getResponse(result);
+            Response response = _client.getResponse(_httpInfo);
             if (response != null) {
                 String status = checkStatus(timeout, response.getResult().getId());
                 printInfo("Action Status: " + status);
@@ -360,8 +365,8 @@ public final class Action {
         }
 
         if (!Strings.isNullOrEmpty(applicationId)) {
-            HTTPInfo result = _client.deleteAppInEnvironment(applicationId);
-            printInfo(result.toString());
+            _httpInfo = _client.deleteAppInEnvironment(applicationId);
+            printInfo(_httpInfo.toString());
 
             String status = checkStatus(timeout, applicationId);
             printInfo("Action Status: " + (status == null ? "deleted" : status));
@@ -608,6 +613,26 @@ public final class Action {
         }
 
         return status;
+    }
+
+    private void printSeparator() {
+        for (int i = 0; i++ < NUM_OF_UNDERSCORES;) {
+            _logger.print('-');
+        }
+    }
+
+    private void printInfo(String... vargs) {
+        _logger.println();
+        for (String varg : vargs) {
+            _logger.println(varg);
+        }
+    }
+
+    private void printFiles(List<String> listOfFiles) {
+        _logger.println("List of " + listOfFiles.size() + " files:");
+        for (String file : listOfFiles) {
+            _logger.println(file);
+        }
     }
 
 }

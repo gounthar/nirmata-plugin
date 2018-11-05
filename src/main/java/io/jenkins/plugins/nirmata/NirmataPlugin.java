@@ -42,7 +42,11 @@ public class NirmataPlugin extends Builder implements SimpleBuildStep, Serializa
             String apiKey = credential.get().getSecret().getPlainText();
 
             if (workspace != null && listener != null && apiKey != null) {
-                launcher.getChannel().call(new ExecuteAction(_builder, workspace, listener, apiKey));
+                Result result = launcher.getChannel().call(new ExecuteAction(_builder, workspace, listener, apiKey));
+                if (result != Result.SUCCESS) {
+                    run.setResult(result);
+                }
+
                 return;
             }
         }
@@ -67,7 +71,7 @@ public class NirmataPlugin extends Builder implements SimpleBuildStep, Serializa
 
     }
 
-    private static class ExecuteAction extends MasterToSlaveCallable<Void, AbortException> {
+    private static class ExecuteAction extends MasterToSlaveCallable<Result, AbortException> {
 
         private static final long serialVersionUID = -8107559201979285317L;
         private final ActionBuilder _builder;
@@ -83,12 +87,11 @@ public class NirmataPlugin extends Builder implements SimpleBuildStep, Serializa
         }
 
         @Override
-        public Void call() throws AbortException {
+        public Result call() throws AbortException {
             NirmataClient client = new NirmataClient(_builder.getEndpoint(), _apiKey);
             Action action = new Action(client, _workspace, _listener);
-            action.buildStep(_builder);
 
-            return null;
+            return action.buildStep(_builder);
         }
     }
 }
