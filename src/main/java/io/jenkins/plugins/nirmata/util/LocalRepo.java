@@ -2,18 +2,15 @@
 package io.jenkins.plugins.nirmata.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jenkinsci.remoting.RoleChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
 import hudson.FilePath;
-import hudson.remoting.VirtualChannel;
 
 public class LocalRepo {
 
@@ -33,7 +30,7 @@ public class LocalRepo {
             try {
                 logger.debug("Directory = {}", directory);
                 FilePath filePath = new FilePath(new File(directory));
-                FilePath[] files = filePath.act(new Files(finalIncludes, excludes));
+                FilePath[] files = filePath.list(finalIncludes, excludes);
 
                 for (FilePath file : files) {
                     listOfFiles.add(file.getRemote());
@@ -46,29 +43,5 @@ public class LocalRepo {
         }
 
         return listOfFiles;
-    }
-
-    private static final class Files implements FilePath.FileCallable<FilePath[]> {
-
-        private static final long serialVersionUID = 7668288892944268487L;
-        private String includes;
-        private String excludes;
-
-        Files(String includes, String excludes) {
-            this.includes = includes;
-            this.excludes = excludes;
-            logger.debug("Includes = {}, excludes = {}", includes, excludes);
-        }
-
-        @Override
-        public FilePath[] invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-            FilePath filePath = new FilePath(f);
-            return filePath.list(includes, excludes);
-        }
-
-        @Override
-        public void checkRoles(RoleChecker checker) throws SecurityException {
-
-        }
     }
 }

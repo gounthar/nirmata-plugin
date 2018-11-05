@@ -15,19 +15,10 @@ import com.google.common.base.Strings;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.nirmata.ActionBuilder;
-import io.jenkins.plugins.nirmata.DeleteEnvAppBuilder;
-import io.jenkins.plugins.nirmata.DeployEnvAppBuilder;
+import io.jenkins.plugins.nirmata.*;
 import io.jenkins.plugins.nirmata.DeployEnvAppBuilder.DeployType;
-import io.jenkins.plugins.nirmata.UpdateCatAppBuilder;
-import io.jenkins.plugins.nirmata.UpdateEnvAppBuilder;
-import io.jenkins.plugins.nirmata.model.HTTPInfo;
-import io.jenkins.plugins.nirmata.model.Model;
-import io.jenkins.plugins.nirmata.model.Response;
-import io.jenkins.plugins.nirmata.model.Result;
-import io.jenkins.plugins.nirmata.util.FileOperations;
-import io.jenkins.plugins.nirmata.util.LocalRepo;
-import io.jenkins.plugins.nirmata.util.NirmataClient;
+import io.jenkins.plugins.nirmata.model.*;
+import io.jenkins.plugins.nirmata.util.*;
 
 public final class Action {
 

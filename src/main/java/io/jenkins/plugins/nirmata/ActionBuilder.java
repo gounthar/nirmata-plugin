@@ -1,16 +1,15 @@
 
 package io.jenkins.plugins.nirmata;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Serializable;
 
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 
-public abstract class ActionBuilder extends AbstractDescribableImpl<ActionBuilder> implements ExtensionPoint {
+public abstract class ActionBuilder extends AbstractDescribableImpl<ActionBuilder>
+    implements ExtensionPoint, Serializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ActionBuilder.class);
-
+    private static final long serialVersionUID = 9092451084647459564L;
     private final String _endpoint;
     private final String _apikey;
 

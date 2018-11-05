@@ -2,31 +2,26 @@
 package io.jenkins.plugins.nirmata;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Optional;
 
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractProject;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.*;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import io.jenkins.plugins.nirmata.action.Action;
 import io.jenkins.plugins.nirmata.util.NirmataClient;
 import io.jenkins.plugins.nirmata.util.NirmataCredentials;
+import jenkins.security.MasterToSlaveCallable;
 import jenkins.tasks.SimpleBuildStep;
 
-public class NirmataPlugin extends Builder implements SimpleBuildStep {
+public class NirmataPlugin extends Builder implements SimpleBuildStep, Serializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(NirmataPlugin.class);
-
+    private static final long serialVersionUID = 6253017462895236976L;
     private final ActionBuilder _builder;
 
     public ActionBuilder getBuilder() {
@@ -41,18 +36,25 @@ public class NirmataPlugin extends Builder implements SimpleBuildStep {
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
         throws InterruptedException, IOException {
-        NirmataCredentials credentials = new NirmataCredentials();
-        Optional<StringCredentials> credential = credentials.getCredential(_builder.getApikey());
-        NirmataClient client = new NirmataClient(_builder.getEndpoint(), credential.get().getSecret().getPlainText());
+        if (_builder != null) {
+            NirmataCredentials credentials = new NirmataCredentials();
+            Optional<StringCredentials> credential = credentials.getCredential(_builder.getApikey());
+            String apiKey = credential.get().getSecret().getPlainText();
 
-        Action action = new Action(client, workspace, listener);
-        action.buildStep(_builder);
+            if (workspace != null && listener != null && apiKey != null) {
+                launcher.getChannel().call(new ExecuteAction(_builder, workspace, listener, apiKey));
+                return;
+            }
+        }
+
+        throw new AbortException("Unable to execute task with NULL parameters!");
     }
 
     @Symbol("nirmata")
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
+        @SuppressWarnings("rawtypes")
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
@@ -65,4 +67,28 @@ public class NirmataPlugin extends Builder implements SimpleBuildStep {
 
     }
 
+    private static class ExecuteAction extends MasterToSlaveCallable<Void, AbortException> {
+
+        private static final long serialVersionUID = -8107559201979285317L;
+        private final ActionBuilder _builder;
+        private final FilePath _workspace;
+        private final TaskListener _listener;
+        private final String _apiKey;
+
+        public ExecuteAction(ActionBuilder builder, FilePath workspace, TaskListener listener, String apiKey) {
+            _builder = builder;
+            _workspace = workspace;
+            _listener = listener;
+            _apiKey = apiKey;
+        }
+
+        @Override
+        public Void call() throws AbortException {
+            NirmataClient client = new NirmataClient(_builder.getEndpoint(), _apiKey);
+            Action action = new Action(client, _workspace, _listener);
+            action.buildStep(_builder);
+
+            return null;
+        }
+    }
 }

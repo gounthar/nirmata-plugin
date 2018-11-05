@@ -20,6 +20,7 @@ import jenkins.model.Jenkins;
 
 public class NirmataCredentials {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(NirmataCredentials.class);
 
     public List<StringCredentials> getCredentials() {

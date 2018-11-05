@@ -10,8 +10,6 @@ import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.google.common.base.Strings;
@@ -28,8 +26,6 @@ import jenkins.model.Jenkins;
 
 public class DeployEnvAppBuilder extends ActionBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(DeployEnvAppBuilder.class);
-
     private final String _environment;
     private final String _application;
     private final Integer _timeout;
@@ -44,7 +40,7 @@ public class DeployEnvAppBuilder extends ActionBuilder {
     public enum DeployType {
         CATALOG, FILES
     }
-    
+
     @DataBoundConstructor
     public DeployEnvAppBuilder(String endpoint, String apikey, String environment, String application, Integer timeout,
         String catalog, String directories, boolean includescheck, String includes, boolean excludescheck,

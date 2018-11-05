@@ -10,16 +10,12 @@ import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.google.common.base.Strings;
 
 import hudson.Extension;
-import hudson.util.ComboBoxModel;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
+import hudson.util.*;
 import io.jenkins.plugins.nirmata.action.ActionType;
 import io.jenkins.plugins.nirmata.model.Model;
 import io.jenkins.plugins.nirmata.model.Status;
@@ -28,8 +24,6 @@ import io.jenkins.plugins.nirmata.util.NirmataCredentials;
 import jenkins.model.Jenkins;
 
 public class DeleteEnvAppBuilder extends ActionBuilder {
-
-    private static final Logger logger = LoggerFactory.getLogger(DeleteEnvAppBuilder.class);
 
     private final String _environment;
     private final String _application;
