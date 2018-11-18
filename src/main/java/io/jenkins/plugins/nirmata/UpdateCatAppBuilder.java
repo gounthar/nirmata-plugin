@@ -8,13 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.*;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.google.common.base.Strings;
 
 import hudson.Extension;
+import hudson.model.Item;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import io.jenkins.plugins.nirmata.action.ActionType;
@@ -79,7 +80,7 @@ public class UpdateCatAppBuilder extends ActionBuilder {
     @Extension
     public static final class DescriptorImpl extends BuilderDescriptor {
 
-        private static final NirmataCredentials credentials = new NirmataCredentials();
+        private NirmataCredentials credentials;
 
         public DescriptorImpl() {
             super(UpdateCatAppBuilder.class, "Update App in Catalog");
@@ -90,7 +91,9 @@ public class UpdateCatAppBuilder extends ActionBuilder {
             return ActionType.UPDATE_CAT_APP.toString();
         }
 
-        public FormValidation doCheckEndpoint(@QueryParameter String endpoint) {
+        public FormValidation doCheckEndpoint(@AncestorInPath Item project, @QueryParameter String endpoint) {
+            credentials = new NirmataCredentials(project);
+
             if (!Strings.isNullOrEmpty(endpoint)) {
                 NirmataClient client = new NirmataClient(endpoint, null);
                 Status status = client.getEnvironments().getStatus();
@@ -103,7 +106,8 @@ public class UpdateCatAppBuilder extends ActionBuilder {
             }
         }
 
-        public FormValidation doCheckApikey(@QueryParameter String endpoint, @QueryParameter String apikey) {
+        public FormValidation doCheckApikey(@AncestorInPath Item project, @QueryParameter String endpoint,
+            @QueryParameter String apikey) {
             if (!Strings.isNullOrEmpty(apikey) && credentials.getCredential(apikey).isPresent()) {
                 Optional<StringCredentials> credential = credentials.getCredential(apikey);
                 NirmataClient client = new NirmataClient(endpoint, credential.get().getSecret().getPlainText());
@@ -118,16 +122,25 @@ public class UpdateCatAppBuilder extends ActionBuilder {
         }
 
         @SuppressWarnings("deprecation")
-        public ListBoxModel doFillApikeyItems() {
-            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
-                return new ListBoxModel();
+        public ListBoxModel doFillApikeyItems(@AncestorInPath Item project, @QueryParameter String credentialsId) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            if (project == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return result.includeCurrentValue(credentialsId);
+                }
+            } else {
+                if (!project.hasPermission(Item.EXTENDED_READ)
+                    && !project.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.includeCurrentValue(credentialsId);
+                }
             }
 
             List<StringCredentials> stringCredentials = credentials.getCredentials();
-            return new StandardListBoxModel().includeEmptyValue().withAll(stringCredentials);
+            return result.includeEmptyValue().withAll(stringCredentials).includeCurrentValue(credentialsId);
         }
 
-        public ListBoxModel doFillCatalogItems(@QueryParameter String endpoint, @QueryParameter String apikey) {
+        public ListBoxModel doFillCatalogItems(@AncestorInPath Item project, @QueryParameter String endpoint,
+            @QueryParameter String apikey) {
             ListBoxModel models = new ListBoxModel();
             if (Strings.isNullOrEmpty(endpoint) || Strings.isNullOrEmpty(apikey)) {
                 return models;

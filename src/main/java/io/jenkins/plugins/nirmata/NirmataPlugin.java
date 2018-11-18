@@ -3,6 +3,7 @@ package io.jenkins.plugins.nirmata;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 import org.jenkinsci.Symbol;
@@ -16,12 +17,14 @@ import hudson.tasks.Builder;
 import io.jenkins.plugins.nirmata.action.Action;
 import io.jenkins.plugins.nirmata.util.NirmataClient;
 import io.jenkins.plugins.nirmata.util.NirmataCredentials;
+import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import jenkins.tasks.SimpleBuildStep;
 
 public class NirmataPlugin extends Builder implements SimpleBuildStep, Serializable {
 
     private static final long serialVersionUID = 6253017462895236976L;
+
     private final ActionBuilder _builder;
 
     public ActionBuilder getBuilder() {
@@ -36,10 +39,18 @@ public class NirmataPlugin extends Builder implements SimpleBuildStep, Serializa
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
         throws InterruptedException, IOException {
+
         if (_builder != null) {
-            NirmataCredentials credentials = new NirmataCredentials();
-            Optional<StringCredentials> credential = credentials.getCredential(_builder.getApikey());
-            String apiKey = credential.get().getSecret().getPlainText();
+            List<Item> items = Jenkins.get().getAllItems();
+            String apiKey = null;
+
+            for (Item item : items) {
+                NirmataCredentials credentials = new NirmataCredentials(item);
+                Optional<StringCredentials> credential = credentials.getCredential(_builder.getApikey());
+                if (credential.isPresent()) {
+                    apiKey = credential.get().getSecret().getPlainText();
+                }
+            }
 
             if (workspace != null && listener != null && apiKey != null) {
                 Result result = launcher.getChannel().call(new ExecuteAction(_builder, workspace, listener, apiKey));
