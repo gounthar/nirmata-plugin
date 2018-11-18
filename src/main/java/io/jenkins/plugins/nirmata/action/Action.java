@@ -89,15 +89,15 @@ public final class Action {
     }
 
     private hudson.model.Result verifyActionStatus() {
-        hudson.model.Result result = hudson.model.Result.SUCCESS;
+        hudson.model.Result result = hudson.model.Result.FAILURE;
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             Payload payload = objectMapper.readValue(_httpInfo.getPayload(), Payload.class);
-            if (payload.getStatus() != HttpServletResponse.SC_OK) {
-                result = hudson.model.Result.FAILURE;
+            if (payload.getStatus() == HttpServletResponse.SC_OK || payload.getStatus() == 0) {
+                result = hudson.model.Result.SUCCESS;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
