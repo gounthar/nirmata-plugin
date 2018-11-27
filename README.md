@@ -207,6 +207,8 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
 ### Version 1.0.3
 - Pipeline support added
 ### Version 1.0.4
-- Improvements and support deployment of application through file added
-
-
+- Improvements and support for deployment of application through file added
+### Version 1.0.8
+- Master-slave configuration support added
+### Version 1.0.9
+- 'cloudbees-folder' plugin support added
