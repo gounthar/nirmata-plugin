@@ -11,7 +11,7 @@
 
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>nirmata</artifactId>
-    <version>1.0.10-SNAPSHOT</version>
+    <version>1.0.10</version>
     <packaging>hpi</packaging>
     <name>Nirmata Plugin</name>
     <description>Enables synchronization of YAML/JSON files stored in a Git repository with a Kubernetes application
@@ -77,7 +77,7 @@
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-        <tag>nirmata-1.0.7</tag>
+        <tag>nirmata-1.0.10</tag>
     </scm>
 
     <repositories>
