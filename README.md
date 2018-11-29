@@ -1,4 +1,8 @@
 # Nirmata Plugin
+[![License](http://img.shields.io/:license-mit-brightgreen.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://ci.jenkins.io/job/Plugins/job/nirmata-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/nirmata-plugin/job/master/)
+[![Jenkins Plugins](https://img.shields.io/jenkins/plugin/v/nirmata.svg)](https://plugins.jenkins.io/nirmata)
+
 This plugin enables synchronization of YAML/JSON files stored in a Git repository with a Kubernetes application managed on the Nirmata platform.
 
 Nirmata is a Kubernetes platform that enables enterprises to deliver a highly scalable, always-on container management platform, built on Kubernetes. Using Nirmata, enterprise teams can fully automate the delivery and management of applications. At Nirmata, our mission is to empower all enterprises to easily deliver and manage containerized applications across public and private clouds.
@@ -212,3 +216,5 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
 - Master-slave configuration support added
 ### Version 1.0.9
 - 'cloudbees-folder' plugin support added
+### Version 1.0.10
+- Bug fix
