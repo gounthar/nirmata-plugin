@@ -85,10 +85,10 @@ public final class Action {
             throw new AbortException("Unknown action request!");
         }
 
-        return verifyActionStatus();
+        return verifyActionStatus(builder);
     }
 
-    private hudson.model.Result verifyActionStatus() {
+    private hudson.model.Result verifyActionStatus(ActionBuilder builder) {
         hudson.model.Result result = hudson.model.Result.FAILURE;
 
         try {
@@ -96,7 +96,8 @@ public final class Action {
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             Payload payload = objectMapper.readValue(_httpInfo.getPayload(), Payload.class);
-            if (payload.getStatus() == HttpServletResponse.SC_OK || payload.getStatus() == 0) {
+            if (payload.getStatus() == HttpServletResponse.SC_OK ||
+                (payload.getStatus() == 0 && builder instanceof DeleteEnvAppBuilder)) {
                 result = hudson.model.Result.SUCCESS;
             }
         } catch (IOException e) {
