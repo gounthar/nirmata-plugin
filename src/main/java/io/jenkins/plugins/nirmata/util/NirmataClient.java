@@ -6,25 +6,19 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.http.entity.*;
+import org.slf4j.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 
 import hudson.AbortException;
-import io.jenkins.plugins.nirmata.model.HTTPInfo;
-import io.jenkins.plugins.nirmata.model.Model;
-import io.jenkins.plugins.nirmata.model.Response;
-import io.jenkins.plugins.nirmata.model.Result;
-import io.jenkins.plugins.nirmata.model.Status;
+import io.jenkins.plugins.nirmata.model.*;
 
 public class NirmataClient {
 
     private static final Logger logger = LoggerFactory.getLogger(NirmataClient.class);
+
     private static final String GET_ENV_API = "/environments/api/Environment?fields=name,id";
     private static final String GET_APPS_FROM_ENV_API = "/environments/api/Environment/%s/applications?fields=name,run,id";
     private static final String GET_APPS_FROM_CAT_API = "/catalog/api/applications?fields=name,id";
@@ -40,6 +34,7 @@ public class NirmataClient {
     private static final String CONTENT_APP_YAML_TYPE = "application/yaml";
     private static final String NIRMATA_STR = "NIRMATA-API ";
     private static final String GET_CHANGE_REQUEST = "/environments/api/changeRequests/%s?fields=name,id,changes,state,user,changeId,sequenceId";
+    private static final String GET_RESOURCE_CHANGE_REQUEST = "/environments/api/resourceChange/%s?fields=namespace,id,source,state,sequenceId,yamlBeforeChange,yamlAfterChange,resourceName,sequenceId,resourceKind";
     private static final String GET_UPDATE_POLICY = "/environments/api/environments/%s/updatePolicy";
     private static final String GET_SYSTEM_TASKS = "/environments/api/systemTasks?fields=id,resourceName,resourceType,name,state,error,subtasks&query=";
     private static final String GET_SYSTEM_SUBTASKS = "/environments/api/systemSubTasks?fields=id,resourceName,resourceType,name,state,error&query=";
@@ -163,6 +158,21 @@ public class NirmataClient {
 
         try {
             String api = String.format(GET_CHANGE_REQUEST, changeRequestID);
+            String uri = String.format("https://%s%s", _endpoint, api);
+
+            httpInfo = HttpClient.doGet(uri, CONTENT_YAML_TYPE, NIRMATA_STR + _apiKey);
+        } catch (Exception e) {
+            logger.error("Error encountered while getting changes from ChangeRequest, {}", e);
+        }
+
+        return httpInfo;
+    }
+
+    public HTTPInfo getChangesFromResourceChange(String resourceChangeId) {
+        HTTPInfo httpInfo = null;
+
+        try {
+            String api = String.format(GET_RESOURCE_CHANGE_REQUEST, resourceChangeId);
             String uri = String.format("https://%s%s", _endpoint, api);
 
             httpInfo = HttpClient.doGet(uri, CONTENT_YAML_TYPE, NIRMATA_STR + _apiKey);

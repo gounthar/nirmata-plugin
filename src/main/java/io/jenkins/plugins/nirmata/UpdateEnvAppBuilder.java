@@ -16,13 +16,10 @@ import com.google.common.base.Strings;
 
 import hudson.Extension;
 import hudson.model.Item;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
+import hudson.util.*;
 import io.jenkins.plugins.nirmata.action.ActionType;
-import io.jenkins.plugins.nirmata.model.Model;
-import io.jenkins.plugins.nirmata.model.Status;
-import io.jenkins.plugins.nirmata.util.NirmataClient;
-import io.jenkins.plugins.nirmata.util.NirmataCredentials;
+import io.jenkins.plugins.nirmata.model.*;
+import io.jenkins.plugins.nirmata.util.*;
 import jenkins.model.Jenkins;
 
 public class UpdateEnvAppBuilder extends ActionBuilder {
@@ -90,7 +87,7 @@ public class UpdateEnvAppBuilder extends ActionBuilder {
         private List<Model> environments;
 
         public DescriptorImpl() {
-            super(UpdateEnvAppBuilder.class, "Update App in Environment");
+            super(UpdateEnvAppBuilder.class, ActionType.UPDATE_ENV_APP.toString());
         }
 
         @Override

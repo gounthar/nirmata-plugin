@@ -1,10 +1,8 @@
 
 package io.jenkins.plugins.nirmata;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -12,11 +10,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.*;
 import hudson.model.*;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
+import hudson.tasks.*;
 import io.jenkins.plugins.nirmata.action.Action;
-import io.jenkins.plugins.nirmata.util.NirmataClient;
-import io.jenkins.plugins.nirmata.util.NirmataCredentials;
+import io.jenkins.plugins.nirmata.util.*;
 import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import jenkins.tasks.SimpleBuildStep;

@@ -6,11 +6,9 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
 import java.util.*;
 
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import com.cloudbees.plugins.credentials.CredentialsMatcher;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.*;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import hudson.model.Item;

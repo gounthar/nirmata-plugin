@@ -16,13 +16,10 @@ import com.google.common.base.Strings;
 
 import hudson.Extension;
 import hudson.model.Item;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
+import hudson.util.*;
 import io.jenkins.plugins.nirmata.action.ActionType;
-import io.jenkins.plugins.nirmata.model.Model;
-import io.jenkins.plugins.nirmata.model.Status;
-import io.jenkins.plugins.nirmata.util.NirmataClient;
-import io.jenkins.plugins.nirmata.util.NirmataCredentials;
+import io.jenkins.plugins.nirmata.model.*;
+import io.jenkins.plugins.nirmata.util.*;
 import jenkins.model.Jenkins;
 
 public class UpdateCatAppBuilder extends ActionBuilder {
@@ -83,7 +80,7 @@ public class UpdateCatAppBuilder extends ActionBuilder {
         private NirmataCredentials credentials;
 
         public DescriptorImpl() {
-            super(UpdateCatAppBuilder.class, "Update App in Catalog");
+            super(UpdateCatAppBuilder.class, ActionType.UPDATE_CAT_APP.toString());
         }
 
         @Override

@@ -7,8 +7,7 @@ import java.util.List;
 
 import org.apache.http.Header;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 public class HTTPInfo {
 

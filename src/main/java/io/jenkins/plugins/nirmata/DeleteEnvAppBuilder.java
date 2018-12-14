@@ -18,10 +18,8 @@ import hudson.Extension;
 import hudson.model.Item;
 import hudson.util.*;
 import io.jenkins.plugins.nirmata.action.ActionType;
-import io.jenkins.plugins.nirmata.model.Model;
-import io.jenkins.plugins.nirmata.model.Status;
-import io.jenkins.plugins.nirmata.util.NirmataClient;
-import io.jenkins.plugins.nirmata.util.NirmataCredentials;
+import io.jenkins.plugins.nirmata.model.*;
+import io.jenkins.plugins.nirmata.util.*;
 import jenkins.model.Jenkins;
 
 public class DeleteEnvAppBuilder extends ActionBuilder {
@@ -59,7 +57,7 @@ public class DeleteEnvAppBuilder extends ActionBuilder {
         private List<Model> environments;
 
         public DescriptorImpl() {
-            super(DeleteEnvAppBuilder.class, "Delete App in Environment");
+            super(DeleteEnvAppBuilder.class, ActionType.DELETE_ENV_APP.toString());
         }
 
         @Override

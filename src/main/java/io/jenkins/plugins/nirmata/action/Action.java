@@ -1,23 +1,19 @@
 
 package io.jenkins.plugins.nirmata.action;
 
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.google.common.base.Strings;
 
-import hudson.AbortException;
-import hudson.FilePath;
+import hudson.*;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.nirmata.*;
 import io.jenkins.plugins.nirmata.DeployEnvAppBuilder.DeployType;
@@ -25,6 +21,25 @@ import io.jenkins.plugins.nirmata.model.*;
 import io.jenkins.plugins.nirmata.util.*;
 
 public final class Action {
+
+    private static final String RUNNING_STR = "running";
+    private static final String ERROR_STR = "error";
+    private static final String ID_STR = "id";
+    private static final String RESOURCE_TYPE_STR = "resourceType";
+    private static final String RESOURCE_NAME_STR = "resourceName";
+    private static final String UNKNOWN_STR = "unknown";
+    private static final String STATE_STR = "state";
+    private static final String NAME_STR = "name";
+    private static final String UPDATE_STR = "update";
+    private static final String DELETED_STR = "deleted";
+    private static final String APPLICATION_ID_STR = "applicationId";
+    private static final String SEQUENCE_ID_STR = "sequenceId";
+    private static final String COMPLETED_STR = "completed";
+    private static final String FAILED_STR = "failed";
+    private static final String RESOURCE_CHANGES_STR = "ResourceChanges";
+    private static final String SUCCESS_STR = "Success";
+    private static final String MESSAGE_STR = "message";
+    private static final String CHANGES_REQUEST_ID_STR = "changesRequestId";
 
     private static final int NUM_OF_UNDERSCORES = 100;
 
@@ -145,6 +160,7 @@ public final class Action {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void update(String environment, String application, String directories, String includes, String excludes,
         Integer timeout) throws AbortException {
         printInfo("Action: " + ActionType.UPDATE_ENV_APP.toString(),
@@ -192,22 +208,46 @@ public final class Action {
             printFiles(listOfFiles);
 
             String yamlStr = FileOperations.appendFiles(listOfFiles);
+
             _httpInfo = _client.updateAppInEnvironment(applicationId, yamlStr);
-
-            printInfo(_httpInfo.toString());
-
             String resultPayload = _httpInfo.getPayload();
-            if (getInfo(resultPayload, "message").equals("Success")) {
+            String changeRequestId = (String) getInfo(resultPayload, CHANGES_REQUEST_ID_STR);
 
-                HTTPInfo changes = _client.getChangesFromChangeRequest(getInfo(resultPayload, "changesRequestId"));
-                printInfo(changes.toString());
+            if (getInfo(resultPayload, MESSAGE_STR).equals(SUCCESS_STR) && changeRequestId == null) {
+                for (Object val : (List<Object>) (getInfo(resultPayload, RESOURCE_CHANGES_STR))) {
+                    String uuidStr = null;
+
+                    for (Object obj : ((LinkedHashMap<Object, Object>) (val)).keySet()) {
+                        if (((String) obj).equals("uuid")) {
+                            Object uuid = ((LinkedHashMap<Object, Object>) val).get(obj);
+                            uuidStr = uuid.toString();
+                        }
+                    }
+
+                    if (StringUtils.isNotEmpty(uuidStr)) {
+                        HTTPInfo changes = _client.getChangesFromResourceChange(uuidStr);
+                        printInfo("ResourceChanges: " + changes.toString());
+
+                        String payload = changes.getPayload();
+                        String updatePolicy = getUpdatePolicy(environmentId, payload);
+                        printInfo("Update Policy: " + updatePolicy);
+
+                        checkUpdatePolicy(updatePolicy, applicationId, payload, timeout);
+                    }
+                }
+            } else if (getInfo(resultPayload, MESSAGE_STR).equals(SUCCESS_STR) && changeRequestId != null) {
+                HTTPInfo changes = _client
+                    .getChangesFromChangeRequest((String) getInfo(resultPayload, CHANGES_REQUEST_ID_STR));
+                printInfo("ChangeRequest: " + changes.toString());
 
                 String payload = changes.getPayload();
-
                 String updatePolicy = getUpdatePolicy(environmentId, payload);
                 printInfo("Update Policy: " + updatePolicy);
 
                 checkUpdatePolicy(updatePolicy, applicationId, payload, timeout);
+            } else {
+                throw new AbortException(
+                    String.format("Unable to update application, {%s}", getInfo(resultPayload, MESSAGE_STR)));
             }
         } else {
             throw new AbortException(
@@ -272,18 +312,20 @@ public final class Action {
             _httpInfo = _client.deployAppFromFiles(environmentId, application, yamlStr);
             printInfo(_httpInfo.toString());
 
-            if (getInfo(_httpInfo.getPayload(), "message").equals("Success")) {
-                String taskState = checkSystemTaskState(timeout, getInfo(_httpInfo.getPayload(), "sequenceId"));
+            if (getInfo(_httpInfo.getPayload(), MESSAGE_STR).equals(SUCCESS_STR)) {
+                String taskState = checkSystemTaskState(timeout,
+                    (String) getInfo(_httpInfo.getPayload(), SEQUENCE_ID_STR));
                 printInfo("System Task State: " + taskState);
 
-                if (taskState.equals("failed")) {
-                    printError(getInfo(_httpInfo.getPayload(), "sequenceId"));
+                if (taskState.equals(FAILED_STR)) {
+                    printError((String) getInfo(_httpInfo.getPayload(), SEQUENCE_ID_STR));
 
-                } else if (taskState.equals("completed")) {
+                } else if (taskState.equals(COMPLETED_STR)) {
                     Response response = _client.getResponse(_httpInfo);
 
                     if (response != null) {
-                        String status = checkStatus(timeout, getInfo(_httpInfo.getPayload(), "applicationId"));
+                        String status = checkStatus(timeout,
+                            (String) getInfo(_httpInfo.getPayload(), APPLICATION_ID_STR));
                         printInfo("Action Status: " + status);
                     }
                 }
@@ -370,14 +412,14 @@ public final class Action {
             printInfo(_httpInfo.toString());
 
             String status = checkStatus(timeout, applicationId);
-            printInfo("Action Status: " + (status == null ? "deleted" : status));
+            printInfo("Action Status: " + (status == null ? DELETED_STR : status));
         } else {
             throw new AbortException(
                 String.format("Unable to delete application, {%s}. ApplicationId is null", application));
         }
     }
 
-    public String getInfo(String result, String find) {
+    public Object getInfo(String result, String find) {
         String info = null;
 
         try {
@@ -392,7 +434,11 @@ public final class Action {
             } else {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> map = objectMapper.readValue(result, Map.class);
-                info = (String) map.get(find);
+                if (!(map.get(find) instanceof java.util.ArrayList)) {
+                    info = (String) map.get(find);
+                } else {
+                    return map.get(find);
+                }
             }
         } catch (Throwable t) {
             printInfo("Failed to parse input " + t.getMessage());
@@ -403,20 +449,20 @@ public final class Action {
 
     public String getUpdatePolicy(String environmentId, String info) {
         HTTPInfo updatePolicy = _client.getUpdatePolicy(environmentId);
-        String policy = getInfo(updatePolicy.getPayload(), "configUpdateAction");
+        String policy = (String) getInfo(updatePolicy.getPayload(), "configUpdateAction");
         return policy;
     }
 
     public void checkUpdatePolicy(String updatePolicy, String applicationId, String changesPayload, Integer timeout) {
         if (!Strings.isNullOrEmpty(updatePolicy)) {
-            if (updatePolicy.equals("update")) {
-                String taskState = printSystemTasks(getInfo(changesPayload, "sequenceId"), timeout);
-
-                if (taskState.equals("completed")) {
+            if (updatePolicy.equals(UPDATE_STR)) {
+                String sequenceId = (String) getInfo(changesPayload, SEQUENCE_ID_STR);
+                String taskState = printSystemTasks(sequenceId, timeout);
+                if (taskState.equals(COMPLETED_STR)) {
                     String statusResult = checkStatus(timeout, applicationId);
                     printInfo("State of application for given timeout: " + statusResult);
-                } else if (taskState.equals("failed")) {
-                    printError(getInfo(changesPayload, "sequenceId"));
+                } else if (taskState.equals(FAILED_STR)) {
+                    printError((String) getInfo(changesPayload, SEQUENCE_ID_STR));
                 } else {
                     printInfo("Timeout occurred. Current System Task State: " + taskState);
                 }
@@ -442,11 +488,11 @@ public final class Action {
         if (!Strings.isNullOrEmpty(_client.getSystemTasks(sequenceId).getPayload())) {
             do {
                 if (System.currentTimeMillis() - lastTime > 15000) {
-                    task = getInfo(_client.getSystemTasks(sequenceId).getPayload(), "name");
-                    state = getInfo(_client.getSystemTasks(sequenceId).getPayload(), "state");
+                    task = (String) getInfo(_client.getSystemTasks(sequenceId).getPayload(), NAME_STR);
+                    state = (String) getInfo(_client.getSystemTasks(sequenceId).getPayload(), STATE_STR);
 
                     if (task == null || state == null) {
-                        state = "unknown";
+                        state = UNKNOWN_STR;
                         continue;
                     }
 
@@ -457,7 +503,7 @@ public final class Action {
                     printInfo("Number of completed subtasks: " + completed);
                     lastTime = System.currentTimeMillis();
                 }
-            } while (!state.equals("completed") && !state.equals("failed")
+            } while (!state.equals(COMPLETED_STR) && !state.equals(FAILED_STR)
                 && System.currentTimeMillis() - startTime < timeDuration);
         }
 
@@ -473,7 +519,7 @@ public final class Action {
             size = subTask.size();
 
             for (int i = 0; i < size; i++) {
-                if (subTask.get(i).get("state").equals("completed")) {
+                if (subTask.get(i).get(STATE_STR).equals(COMPLETED_STR)) {
                     count++;
                 }
             }
@@ -502,13 +548,13 @@ public final class Action {
 
                 if (System.currentTimeMillis() - lastTime > 15000) {
                     systemTasks = _client.getSystemTasks(sequenceId).getPayload();
-                    taskName = getInfo(systemTasks, "resourceName");
-                    taskType = getInfo(systemTasks, "resourceType");
-                    taskId = getInfo(systemTasks, "id");
-                    taskState = getInfo(systemTasks, "state");
+                    taskName = (String) getInfo(systemTasks, RESOURCE_NAME_STR);
+                    taskType = (String) getInfo(systemTasks, RESOURCE_TYPE_STR);
+                    taskId = (String) getInfo(systemTasks, ID_STR);
+                    taskState = (String) getInfo(systemTasks, STATE_STR);
 
                     if (taskState == null) {
-                        taskState = "unknown";
+                        taskState = UNKNOWN_STR;
                         continue;
                     }
 
@@ -522,10 +568,10 @@ public final class Action {
                     printInfo("    Subtasks:");
 
                     for (int i = 0; i < data.size(); i++) {
-                        subTaskName = (String) data.get(i).get("resourceName");
-                        subTaskType = (String) data.get(i).get("resourceType");
-                        subTaskId = (String) data.get(i).get("id");
-                        subTaskState = (String) data.get(i).get("state");
+                        subTaskName = (String) data.get(i).get(RESOURCE_NAME_STR);
+                        subTaskType = (String) data.get(i).get(RESOURCE_TYPE_STR);
+                        subTaskId = (String) data.get(i).get(ID_STR);
+                        subTaskState = (String) data.get(i).get(STATE_STR);
                         printInfo(String.format(
                             "ResourceName: %-14s ResourceType: %-14s TaskId: %-38s TaskState: %-12s", subTaskName,
                             subTaskType, subTaskId, subTaskState));
@@ -533,7 +579,7 @@ public final class Action {
 
                     lastTime = System.currentTimeMillis();
                 }
-            } while (!taskState.equals("completed") && !taskState.equals("failed")
+            } while (!taskState.equals(COMPLETED_STR) && !taskState.equals(FAILED_STR)
                 && (System.currentTimeMillis() - startTime < timeDuration));
         }
 
@@ -541,14 +587,14 @@ public final class Action {
     }
 
     public void printError(String sequenceId) {
-        String taskError = getInfo(_client.getSystemTasks(sequenceId).getPayload(), "error");
+        String taskError = (String) getInfo(_client.getSystemTasks(sequenceId).getPayload(), ERROR_STR);
         List<Map<String, Object>> subTasks = getSubTasks(_client.getSystemSubTasks(sequenceId).getPayload());
 
         printInfo("System Task Error: " + taskError);
 
         for (int i = 0; i < subTasks.size(); i++) {
-            if (subTasks.get(i).get("state").equals("failed")) {
-                String subTaskError = (String) subTasks.get(i).get("error");
+            if (subTasks.get(i).get(STATE_STR).equals(FAILED_STR)) {
+                String subTaskError = (String) subTasks.get(i).get(ERROR_STR);
                 String afterDecoding = StringEscapeUtils.unescapeHtml(subTaskError);
                 printInfo("Sub Task Error: " + afterDecoding);
             }
@@ -597,7 +643,7 @@ public final class Action {
                             .println(String.format("%-20d%-30s%-30s", (System.currentTimeMillis() - startTime) / 1000,
                                 status, executionStatus));
 
-                        if (status.equals("running") && (System.currentTimeMillis() - startTime > 1000)) {
+                        if (status.equals(RUNNING_STR) && (System.currentTimeMillis() - startTime > 1000)) {
                             return status;
                         }
                     }

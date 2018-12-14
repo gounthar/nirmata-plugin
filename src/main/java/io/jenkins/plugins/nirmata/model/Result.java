@@ -67,13 +67,13 @@ public class Result {
     public void setState(String state) {
         _state = state;
     }
-    
+
     public String getExecutionState() {
-    	return _execState;
+        return _execState;
     }
-    
+
     public void setExecutionState(String execState) {
-    	this._execState = execState;
+        this._execState = execState;
     }
 
 }
