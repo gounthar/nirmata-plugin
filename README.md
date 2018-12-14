@@ -218,3 +218,5 @@ Install this plugin via the Jenkins plugin manager or download the latest versio
 - 'cloudbees-folder' plugin support added
 ### Version 1.0.10
 - Bug fix
+### Version 1.0.11
+- Changes from Nirmata 2.4
